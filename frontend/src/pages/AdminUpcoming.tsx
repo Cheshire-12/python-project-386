@@ -33,13 +33,19 @@ export function AdminUpcoming() {
   return (
     <SimpleGrid cols={{ base: 1, md: 4 }} spacing={0}>
       <AdminSidebar />
-      <Paper p="md" style={{ gridColumn: 'span 3' }}>
+      <Paper
+        p="md"
+        style={{
+          gridColumn: 'span 3',
+          backgroundColor: '#18181b',
+        }}
+      >
         <Stack gap="md">
           <Title order={2}>Предстоящие встречи</Title>
 
           {loading ? (
             <Center py="xl">
-              <Loader />
+              <Loader color="gray" />
             </Center>
           ) : error ? (
             <Text c="red">{error}</Text>
@@ -48,7 +54,14 @@ export function AdminUpcoming() {
               Предстоящих встреч нет
             </Text>
           ) : (
-            <Table striped highlightOnHover>
+            <Table
+              styles={{
+                table: { backgroundColor: '#25262b' },
+                th: { color: '#909296', borderColor: '#2c2e33' },
+                td: { borderColor: '#2c2e33' },
+                tr: { color: '#fafafa' },
+              }}
+            >
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>ID</Table.Th>
@@ -64,13 +77,13 @@ export function AdminUpcoming() {
                     <Table.Td>#{b.id}</Table.Td>
                     <Table.Td>
                       <Group gap="xs">
-                        <IconUser size={16} />
+                        <IconUser size={16} color="#909296" />
                         <Text fw={500}>{b.guestName}</Text>
                       </Group>
                     </Table.Td>
                     <Table.Td>
                       <Group gap="xs">
-                        <IconClock size={14} />
+                        <IconClock size={14} color="#909296" />
                         {dayjs(b.startsAt).format('D MMM, HH:mm')}
                       </Group>
                     </Table.Td>

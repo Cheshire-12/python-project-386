@@ -1,16 +1,15 @@
 import { useState, useMemo } from 'react';
 import {
-  SimpleGrid,
   Paper,
   Text,
   Group,
   Stack,
   Button,
   UnstyledButton,
-  Badge,
+  SimpleGrid,
+  SegmentedControl,
 } from '@mantine/core';
 import {
-  IconClock,
   IconChevronLeft,
   IconChevronRight,
 } from '@tabler/icons-react';
@@ -33,6 +32,7 @@ export function SlotPicker({
   onSlotSelect,
 }: SlotPickerProps) {
   const [currentMonth, setCurrentMonth] = useState(dayjs());
+  const [timeFormat, setTimeFormat] = useState<string>('24');
 
   const days = useMemo(() => {
     const start = currentMonth.startOf('month');
@@ -58,27 +58,34 @@ export function SlotPicker({
 
   const availableSlotsForDate = slotsForDate.filter((s) => s.available);
 
-  const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+  const weekDays = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
+
+  const formatTime = (time: string) => {
+    if (timeFormat === '12') {
+      return dayjs(time).format('hh:mm A');
+    }
+    return dayjs(time).format('HH:mm');
+  };
 
   return (
     <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
-      <Paper withBorder p="md" radius="md">
+      {/* Calendar */}
+      <Paper p="md" radius="md" style={{ backgroundColor: '#25262b' }}>
         <Stack gap="md">
           <Group justify="space-between">
-            <Button
-              variant="subtle"
-              size="compact-sm"
+            <UnstyledButton
               onClick={() => setCurrentMonth(currentMonth.subtract(1, 'month'))}
-              leftSection={<IconChevronLeft size={16} />}
             >
+              <IconChevronLeft size={20} color="#909296" />
+            </UnstyledButton>
+            <Text fw={600} size="sm">
               {currentMonth.format('MMMM YYYY')}
-            </Button>
-            <Button
-              variant="subtle"
-              size="compact-sm"
+            </Text>
+            <UnstyledButton
               onClick={() => setCurrentMonth(currentMonth.add(1, 'month'))}
-              rightSection={<IconChevronRight size={16} />}
-            />
+            >
+              <IconChevronRight size={20} color="#909296" />
+            </UnstyledButton>
           </Group>
 
           <SimpleGrid cols={7} spacing="xs">
@@ -87,48 +94,76 @@ export function SlotPicker({
                 {d}
               </Text>
             ))}
-            {days.map((day, i) => (
-              <UnstyledButton
-                key={i}
-                onClick={() => day && onDateSelect(day)}
-                disabled={!day}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: 36,
-                  height: 36,
-                  borderRadius: 'var(--mantine-radius-sm)',
-                  backgroundColor:
-                    day && day.isSame(selectedDate, 'day')
-                      ? 'var(--mantine-color-blue-filled)'
-                      : day && day.isSame(dayjs(), 'day')
-                        ? 'var(--mantine-color-gray-1)'
+            {days.map((day, i) => {
+              const isSelected = day && day.isSame(selectedDate, 'day');
+              const isToday = day && day.isSame(dayjs(), 'day');
+              const hasSlots = day && slots.some((s) => dayjs(s.start).isSame(day, 'day') && s.available);
+
+              return (
+                <UnstyledButton
+                  key={i}
+                  onClick={() => day && onDateSelect(day)}
+                  disabled={!day}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 40,
+                    height: 40,
+                    borderRadius: 'var(--mantine-radius-sm)',
+                    backgroundColor: isSelected
+                      ? '#fafafa'
+                      : isToday
+                        ? '#2c2e33'
                         : undefined,
-                  color:
-                    day && day.isSame(selectedDate, 'day')
-                      ? 'white'
-                      : undefined,
-                  cursor: day ? 'pointer' : 'default',
-                }}
-              >
-                <Text size="sm">{day ? day.date() : ''}</Text>
-              </UnstyledButton>
-            ))}
+                    color: isSelected ? '#1a1b1e' : '#fafafa',
+                    cursor: day ? 'pointer' : 'default',
+                    fontWeight: isSelected || isToday ? 600 : 400,
+                    position: 'relative',
+                  }}
+                >
+                  <Text size="sm">{day ? day.date() : ''}</Text>
+                  {hasSlots && !isSelected && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: 2,
+                        width: 4,
+                        height: 4,
+                        borderRadius: '50%',
+                        backgroundColor: '#40c057',
+                      }}
+                    />
+                  )}
+                </UnstyledButton>
+              );
+            })}
           </SimpleGrid>
         </Stack>
       </Paper>
 
-      <Paper withBorder p="md" radius="md">
+      {/* Time slots */}
+      <Paper p="md" radius="md" style={{ backgroundColor: '#25262b' }}>
         <Stack gap="md">
-          <Group>
-            <IconClock size={18} />
+          <Group justify="space-between">
             <Text fw={600}>
-              {selectedDate.format('D MMMM YYYY')}
+              {selectedDate.format('ddd D')}
             </Text>
-            <Badge variant="light" color="blue">
-              {availableSlotsForDate.length} слотов
-            </Badge>
+            <SegmentedControl
+              value={timeFormat}
+              onChange={(v) => setTimeFormat(v)}
+              data={[
+                { label: '12 ч', value: '12' },
+                { label: '24ч', value: '24' },
+              ]}
+              size="xs"
+              color="dark"
+              styles={{
+                root: { backgroundColor: '#1a1b1e' },
+                indicator: { backgroundColor: '#373a40' },
+                label: { color: '#909296' },
+              }}
+            />
           </Group>
 
           {availableSlotsForDate.length === 0 ? (
@@ -136,21 +171,37 @@ export function SlotPicker({
               Нет свободных слотов на эту дату
             </Text>
           ) : (
-            <SimpleGrid cols={2} spacing="xs">
-              {availableSlotsForDate.map((slot) => (
-                <Button
-                  key={slot.start}
-                  variant={
-                    selectedSlot?.start === slot.start ? 'filled' : 'outline'
-                  }
-                  color={selectedSlot?.start === slot.start ? 'green' : 'gray'}
-                  onClick={() => onSlotSelect(slot)}
-                  size="compact-md"
-                >
-                  {dayjs(slot.start).format('HH:mm')}
-                </Button>
-              ))}
-            </SimpleGrid>
+            <Stack gap="xs">
+              {availableSlotsForDate.map((slot) => {
+                const isSelected = selectedSlot?.start === slot.start;
+                return (
+                  <Button
+                    key={slot.start}
+                    variant={isSelected ? 'filled' : 'outline'}
+                    color={isSelected ? 'green' : 'dark'}
+                    onClick={() => onSlotSelect(slot)}
+                    justify="center"
+                    fullWidth
+                    style={{
+                      borderColor: '#373a40',
+                      color: isSelected ? undefined : '#fafafa',
+                    }}
+                    leftSection={
+                      <div
+                        style={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          backgroundColor: '#40c057',
+                        }}
+                      />
+                    }
+                  >
+                    {formatTime(slot.start)}
+                  </Button>
+                );
+              })}
+            </Stack>
           )}
         </Stack>
       </Paper>

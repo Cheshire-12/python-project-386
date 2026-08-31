@@ -36,7 +36,7 @@ export function BookingConfirmation() {
   if (loading) {
     return (
       <Center py="xl">
-        <Loader />
+        <Loader color="gray" />
       </Center>
     );
   }
@@ -52,7 +52,12 @@ export function BookingConfirmation() {
   return (
     <Container size="md" py="xl">
       <Stack align="center" gap="xl">
-        <Paper withBorder p="xl" radius="md" w="100%">
+        <Paper
+          p="xl"
+          radius="md"
+          w="100%"
+          style={{ backgroundColor: '#25262b', border: '1px solid #2c2e33' }}
+        >
           <Stack gap="lg" align="center">
             <Badge
               color="green"
@@ -67,7 +72,7 @@ export function BookingConfirmation() {
               Вы записаны!
             </Title>
 
-            <Divider w="100%" />
+            <Divider w="100%" color="#2c2e33" />
 
             <Stack gap="sm" w="100%">
               <Group justify="space-between">
@@ -103,7 +108,8 @@ export function BookingConfirmation() {
         <Button
           component={Link}
           to="/event-types"
-          variant="outline"
+          variant="subtle"
+          color="gray"
           leftSection={<IconArrowLeft size={18} />}
         >
           Вернуться к событиям

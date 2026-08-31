@@ -21,7 +21,12 @@ interface BookingFormProps {
   loading: boolean;
 }
 
-export function BookingForm({ eventType, selectedSlot, onSubmit, loading }: BookingFormProps) {
+export function BookingForm({
+  eventType,
+  selectedSlot,
+  onSubmit,
+  loading,
+}: BookingFormProps) {
   const [guestName, setGuestName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -32,15 +37,24 @@ export function BookingForm({ eventType, selectedSlot, onSubmit, loading }: Book
   };
 
   return (
-    <Paper withBorder p="md" radius="md" pos="relative">
+    <Paper
+      p="md"
+      radius="md"
+      pos="relative"
+      style={{ backgroundColor: '#25262b' }}
+    >
       <LoadingOverlay visible={loading} />
       <Stack gap="md">
         <Text fw={600} size="lg">
-          Запись на "{eventType.name}"
+          Запись на «{eventType.name}»
         </Text>
 
         <Group>
-          <Badge variant="light" color="green" leftSection={<IconCheck size={14} />}>
+          <Badge
+            variant="light"
+            color="green"
+            leftSection={<IconCheck size={14} />}
+          >
             Свободно
           </Badge>
           <Text size="sm" c="dimmed">
@@ -49,7 +63,7 @@ export function BookingForm({ eventType, selectedSlot, onSubmit, loading }: Book
           </Text>
         </Group>
 
-        <Divider />
+        <Divider color="#2c2e33" />
 
         <form onSubmit={handleSubmit}>
           <Stack gap="md">

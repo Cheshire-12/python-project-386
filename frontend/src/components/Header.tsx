@@ -11,7 +11,12 @@ export function Header() {
   const isAdmin = location.pathname.startsWith('/admin');
 
   return (
-    <Box component="header" py="xs" px="md" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+    <Box
+      component="header"
+      py="xs"
+      px="md"
+      style={{ borderBottom: '1px solid #2c2e33' }}
+    >
       <Container size="xl">
         <Group justify="space-between">
           <Group>
@@ -19,6 +24,7 @@ export function Header() {
               component={Link}
               to="/"
               variant="subtle"
+              c="white"
               leftSection={<IconCalendar size={20} />}
               size="lg"
               fw={700}
@@ -32,6 +38,7 @@ export function Header() {
               component={Link}
               to="/event-types"
               variant={location.pathname === '/event-types' ? 'filled' : 'subtle'}
+              c="white"
               leftSection={<IconCalendarEvent size={18} />}
             >
               События
@@ -40,6 +47,7 @@ export function Header() {
               component={Link}
               to="/admin/event-types"
               variant={isAdmin ? 'filled' : 'subtle'}
+              c="white"
               leftSection={<IconSettings size={18} />}
             >
               Админ

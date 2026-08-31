@@ -11,11 +11,25 @@ import { AdminUpcoming } from './pages/AdminUpcoming';
 const theme = createTheme({
   primaryColor: 'blue',
   defaultRadius: 'md',
+  colors: {
+    dark: [
+      '#c1c2c5',
+      '#a6a7ab',
+      '#909296',
+      '#5c5f66',
+      '#373a40',
+      '#2c2e33',
+      '#25262b',
+      '#1a1b1e',
+      '#141517',
+      '#101113',
+    ],
+  },
 });
 
 function App() {
   return (
-    <MantineProvider theme={theme}>
+    <MantineProvider theme={theme} defaultColorScheme="dark">
       <BrowserRouter>
         <Routes>
           <Route element={<Layout />}>

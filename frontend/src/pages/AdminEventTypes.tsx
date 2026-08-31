@@ -63,7 +63,13 @@ export function AdminEventTypes() {
   return (
     <SimpleGrid cols={{ base: 1, md: 4 }} spacing={0}>
       <AdminSidebar />
-      <Paper p="md" style={{ gridColumn: 'span 3' }}>
+      <Paper
+        p="md"
+        style={{
+          gridColumn: 'span 3',
+          backgroundColor: '#18181b',
+        }}
+      >
         <Stack gap="md">
           <Group justify="space-between">
             <Title order={2}>Типы событий</Title>
@@ -77,7 +83,7 @@ export function AdminEventTypes() {
 
           {loading ? (
             <Center py="xl">
-              <Loader />
+              <Loader color="gray" />
             </Center>
           ) : error ? (
             <Text c="red">{error}</Text>
@@ -86,7 +92,14 @@ export function AdminEventTypes() {
               Типов событий пока нет. Создайте первый!
             </Text>
           ) : (
-            <Table striped highlightOnHover>
+            <Table
+              styles={{
+                table: { backgroundColor: '#25262b' },
+                th: { color: '#909296', borderColor: '#2c2e33' },
+                td: { borderColor: '#2c2e33' },
+                tr: { color: '#fafafa' },
+              }}
+            >
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>ID</Table.Th>
@@ -122,13 +135,19 @@ export function AdminEventTypes() {
           onClose={() => setModalOpen(false)}
           title="Новый тип события"
           centered
+          styles={{
+            content: { backgroundColor: '#1a1b1e' },
+            header: { backgroundColor: '#1a1b1e' },
+          }}
         >
           <Stack gap="md">
             <TextInput
               label="Название"
               placeholder="Консультация"
               value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.currentTarget.value })}
+              onChange={(e) =>
+                setForm({ ...form, name: e.currentTarget.value })
+              }
               required
             />
             <Textarea
@@ -144,14 +163,24 @@ export function AdminEventTypes() {
               label="Длительность (мин)"
               value={form.durationMinutes}
               onChange={(val) =>
-                setForm({ ...form, durationMinutes: (typeof val === 'number' ? val : parseInt(val) || 30) })
+                setForm({
+                  ...form,
+                  durationMinutes:
+                    typeof val === 'number'
+                      ? val
+                      : parseInt(val) || 30,
+                })
               }
               min={1}
               step={30}
               required
             />
             <Group justify="flex-end">
-              <Button variant="outline" onClick={() => setModalOpen(false)}>
+              <Button
+                variant="subtle"
+                color="gray"
+                onClick={() => setModalOpen(false)}
+              >
                 Отмена
               </Button>
               <Button onClick={handleCreate} loading={creating}>
