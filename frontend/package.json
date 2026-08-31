@@ -1,0 +1,36 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "spec:compile": "tsp compile ../typespec --output-dir ./src/types/generated",
+    "spec:watch": "tsp compile ../typespec --output-dir ./src/types/generated --watch"
+  },
+  "dependencies": {
+    "@mantine/core": "^9.5.2",
+    "@mantine/hooks": "^9.5.2",
+    "@tabler/icons-react": "^3.46.0",
+    "dayjs": "^1.11.23",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@typespec/compiler": "^1.15.0",
+    "@typespec/http": "^1.15.0",
+    "@typespec/openapi": "^1.15.0",
+    "@typespec/openapi3": "^1.15.0",
+    "@vitejs/plugin-react": "^6.1.0",
+    "oxlint": "^1.79.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.2"
+  }
+}
