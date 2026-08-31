@@ -22,7 +22,7 @@
 typespec/              # спецификация TypeSpec (3 файла)
 dist/                  # генерируемый OpenAPI 3.0 (make spec)
 backend/               # Flask бэкенд (Python ≥ 3.12 + SQLite)
-├── app.py             # create_app, CORS,蓝图, catch-all маршрут
+├── app.py             # create_app, CORS, blueprints, catch-all маршрут
 ├── routes/            # guest_bp, admin_bp
 └── errors.py          # обработка ошибок
 frontend/              # React + Vite + Mantine фронтенд
