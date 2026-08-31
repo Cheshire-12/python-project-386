@@ -4,7 +4,7 @@
 ## Обзор проекта
 Веб-приложение "Календарь звонков": бэкенд на Flask (Python >= 3.12) + SQLite, API-контракт задан через TypeSpec (`typespec/main.tsp`, `typespec/models.tsp`, `typespec/operations.tsp`), фронтенд на React 19 + TypeScript + Vite + Mantine 9, Prism для мокирования API при разработке.
 - **Подход Design First**: контракт задается до реализации
-- **Бэкенд отдельно**: Flask + SQLite (пока не реализован)
+- **Бэкенд отдельно**: Flask + SQLite (заготовка есть, отдаёт API + фронтенд)
 - **Фронтенд**: `frontend/` — отдельный Vite-проект с React + Mantine
 - **Таймзона**: `Europe/Moscow` (единая для всего календаря)
 - **Бэкенд**: Flask на порту 8000 (порт 5000 занят macOS AirPlay)
@@ -78,15 +78,33 @@ make openapi           # cat dist/openapi.yaml
 
 ## Требования к окружению
 - Node.js 18+ для фронтенда и Prism
-- Python 3.12+ + Flask + SQLite для бэкенда (пока не реализован)
+- Python 3.12+ + Flask + SQLite для бэкенда (заготовка на порту 8000)
 - `make frontend-install` — установить зависимости фронтенда
 - `make spec` — сгенерировать OpenAPI перед запуском
 
 ### Возможные подводные камни
 - dist/openapi.yaml отсутствует — сгенерировать через make spec
 - Prism mock отдает ответы по контракту до того, как бэкенд готов — полезен для фронтенд-разработки
-- Vite проксирует `/api` на `http://localhost:4010` (Prism)
+- Vite проксирует `/api` на `http://localhost:8000` (Flask)
 - Все datetime в API передаются как utcDateTime, сервер интерпретирует в Europe/Moscow
+
+## Лог сессий
+
+### 2026-09-01 — Dark theme + Flask serves frontend
+
+**Сделано:**
+- Тёмная тема Mantine (background #18181b, cards #25262b)
+- GuestEventTypes: переделка с поиском, кнопкой «Создать», карточками
+- GuestBooking: 3-панельный layout (инфо | календарь | слоты)
+- SlotPicker: тёмный календарь с зелёными точками доступности
+- CreateEventTypeModal: новая модалка создания события
+- AdminSidebar/AdminEventTypes/AdminUpcoming: тёмная тема
+- BookingForm/BookingConfirmation: тёмная тема
+- Flask catch-all маршрут отдаёт frontend/dist/ для SPA
+- Vite proxy target исправлен с 5000 на 8000
+- Git push: commit 5750113
+
+**Изменённые файлы:** 17 (14 modified + 2 new + 1 untracked)
 
 ## Важные замечания
 - .github/workflows/hexlet-check.yml и .github/workflows/README.md — служебные файлы Hexlet: их **нельзя редактировать, удалять или переименовывать.**
