@@ -20,16 +20,20 @@
 
 ```
 typespec/              # спецификация TypeSpec (3 файла)
-dist/                  # генерируемый OpenAPI 3.0 (npm run spec)
+dist/                  # генерируемый OpenAPI 3.0 (make spec)
+backend/               # Flask бэкенд (Python ≥ 3.12 + SQLite)
+├── app.py             # create_app, CORS, blueprints, catch-all маршрут
+├── routes/            # guest_bp, admin_bp
+└── errors.py          # обработка ошибок
 frontend/              # React + Vite + Mantine фронтенд
 ├── src/
 │   ├── api/           # API-клиент (fetch-обёртка)
 │   ├── types/         # TypeScript-типы из OpenAPI
-│   ├── pages/         # Страницы (Landing, Guest, Admin)
-│   ├── components/    # Переиспользуемые компоненты
-│   └── App.tsx        # Роутинг
+│   ├── pages/         # Страницы (Landing, GuestEventTypes, GuestBooking, BookingConfirmation, AdminEventTypes, AdminUpcoming)
+│   ├── components/    # Переиспользуемые компоненты (Header, Layout, SlotPicker, BookingForm, CreateEventTypeModal, AdminSidebar)
+│   └── App.tsx        # Роутинг + тёмная тема Mantine
 Makefile               # автоматизация сборки
-prism.yaml             # конфигурация Prism mock
+prism.yaml             # конфигурация Prism mock (опционально)
 ```
 
 ## Ключевые команды
@@ -38,10 +42,12 @@ prism.yaml             # конфигурация Prism mock
 # Установка зависимостей
 make frontend-install
 
-# Разработка (Prism mock + Vite dev server)
-make dev
+# Разработка (Flask backend + Vite dev server)
+make dev               # make backend-run + make frontend-dev
+make backend-run       # Flask на порту 8000
+make frontend-dev      # Vite dev server на порту 3000
 
-# Только Vite dev server (без Prism)
+# Только фронтенд (без бэкенда)
 make frontend-dev
 
 # Спецификация
@@ -49,9 +55,9 @@ make spec              # компиляция TypeSpec → dist/openapi.yaml
 make spec-watch        # режим слежения
 
 # Сборка
-make frontend-build    #.production сборка
+make frontend-build    # production сборка
 
-# Prism
+# Prism (опционально, для мокирования без бэкенда)
 make prism-mock        # mock server (порт 4010)
 make prism-proxy       # проксирование на бэкенд (порт 8000)
 make prism-stop        # остановка Prism
@@ -76,15 +82,15 @@ make openapi
    ```bash
    make dev
    ```
-   - Vite dev server: `http://localhost:3000`
-   - Prism mock: `http://localhost:4010`
+   - Flask backend: `http://localhost:8000` (API + фронтенд из `frontend/dist/`)
+   - Vite dev server: `http://localhost:3000` (hot-reload, проксирует `/api` → Flask)
 
-4. **Открыть в браузере:** `http://localhost:3000`
+4. **Открыть в браузере:** `http://localhost:3000` (Vite) или `http://localhost:8000` (Flask, нужен `make frontend-build`)
 
 ## Технологии
 
-- **Бэкенд:** Flask (Python ≥ 3.12) + SQLite (пока не реализован)
+- **Бэкенд:** Flask (Python ≥ 3.12) + SQLite, отдаёт API и фронтенд
 - **API-контракт:** TypeSpec → OpenAPI 3.0
-- **Фронтенд:** React 19 + TypeScript + Vite + Mantine 9
-- **Мокинг:** Prism (mock/proxy по OpenAPI)
+- **Фронтенд:** React 19 + TypeScript + Vite + Mantine 9 (тёмная тема Cal.com-стиль)
+- **Мокинг:** Prism (опционально, mock/proxy по OpenAPI)
 - **Таймзона:** Europe/Moscow
