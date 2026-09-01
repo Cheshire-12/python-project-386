@@ -30,6 +30,30 @@ def validate_event_type_create(data: dict) -> None:
         raise ValidationError(details=errors)
 
 
+def validate_event_type_update(data: dict, exclude_id: int) -> None:
+    errors: list[str] = []
+
+    name = data.get("name")
+    if not isinstance(name, str) or not (1 <= len(name) <= 100):
+        errors.append("name: должно быть строкой от 1 до 100 символов")
+    else:
+        for et in list_event_types():
+            if et["name"] == name and et["id"] != exclude_id:
+                errors.append(f"name: тип события с именем '{name}' уже существует")
+                break
+
+    description = data.get("description")
+    if not isinstance(description, str) or len(description) < 1:
+        errors.append("description: должно быть непустой строкой")
+
+    duration = data.get("durationMinutes")
+    if not isinstance(duration, int) or duration < 1:
+        errors.append("durationMinutes: должно быть целым числом >= 1")
+
+    if errors:
+        raise ValidationError(details=errors)
+
+
 def validate_booking_create(data: dict) -> None:
     errors: list[str] = []
 

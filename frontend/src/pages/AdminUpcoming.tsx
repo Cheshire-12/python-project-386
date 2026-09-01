@@ -5,7 +5,6 @@ import {
   Stack,
   Group,
   Table,
-  Badge,
   Center,
   Loader,
   Paper,
@@ -14,21 +13,30 @@ import {
 import { IconClock, IconUser } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import { adminApi } from '@/api/admin';
+import { eventTypesApi } from '@/api/eventTypes';
 import { AdminSidebar } from '@/components/AdminSidebar';
-import type { Booking } from '@/types';
+import type { Booking, EventType } from '@/types';
 
 export function AdminUpcoming() {
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [eventTypes, setEventTypes] = useState<EventType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    adminApi.bookings
-      .upcoming()
-      .then((data) => setBookings(data.bookings))
+    Promise.all([
+      adminApi.bookings.upcoming(),
+      eventTypesApi.list(),
+    ])
+      .then(([bookingsData, types]) => {
+        setBookings(bookingsData.bookings);
+        setEventTypes(types);
+      })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
+
+  const eventTypeMap = new Map(eventTypes.map((et) => [et.id, et.name]));
 
   return (
     <SimpleGrid cols={{ base: 1, md: 4 }} spacing={0}>
@@ -64,17 +72,15 @@ export function AdminUpcoming() {
             >
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th>ID</Table.Th>
                   <Table.Th>Гость</Table.Th>
                   <Table.Th>Время</Table.Th>
-                  <Table.Th>Тип события</Table.Th>
+                  <Table.Th>Название</Table.Th>
                   <Table.Th>Контакты</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
                 {bookings.map((b) => (
                   <Table.Tr key={b.id}>
-                    <Table.Td>#{b.id}</Table.Td>
                     <Table.Td>
                       <Group gap="xs">
                         <IconUser size={16} color="#909296" />
@@ -88,9 +94,9 @@ export function AdminUpcoming() {
                       </Group>
                     </Table.Td>
                     <Table.Td>
-                      <Badge variant="light" color="blue">
-                        #{b.eventTypeId}
-                      </Badge>
+                      <Text fw={500}>
+                        {eventTypeMap.get(b.eventTypeId) ?? `#${b.eventTypeId}`}
+                      </Text>
                     </Table.Td>
                     <Table.Td>
                       <Stack gap={0}>

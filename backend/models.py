@@ -49,6 +49,29 @@ def get_event_type(event_type_id: int) -> dict[str, Any] | None:
     return _event_types.get(event_type_id)
 
 
+def update_event_type(
+    event_type_id: int, name: str, description: str, duration_minutes: int
+) -> dict[str, Any]:
+    et = _event_types.get(event_type_id)
+    if et is None:
+        raise NotFoundError(f"Тип события {event_type_id} не найден")
+    for other in _event_types.values():
+        if other["id"] != event_type_id and other["name"] == name:
+            from backend.errors import ConflictError
+            raise ConflictError(f"Тип события с именем '{name}' уже существует")
+    et["name"] = name
+    et["description"] = description
+    et["durationMinutes"] = duration_minutes
+    return et
+
+
+def delete_event_type(event_type_id: int) -> bool:
+    if event_type_id not in _event_types:
+        return False
+    del _event_types[event_type_id]
+    return True
+
+
 def list_event_types() -> list[dict[str, Any]]:
     return list(_event_types.values())
 

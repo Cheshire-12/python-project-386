@@ -1,18 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Title,
   Text,
   Stack,
   Group,
   Center,
   Loader,
   Paper,
-  Avatar,
   Select,
   Divider,
 } from '@mantine/core';
-import { IconClock, IconVideo, IconGlobe } from '@tabler/icons-react';
+import { IconClock, IconGlobe } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import { eventTypesApi } from '@/api/eventTypes';
 import { bookingsApi } from '@/api/bookings';
@@ -123,30 +121,19 @@ export function GuestBooking() {
         }}
       >
         <Stack gap="md">
-          <Group gap="sm">
-            <Avatar size={40} radius="xl" color="blue" variant="filled">
-              AV
-            </Avatar>
-            <Text fw={500} size="sm">
-              Andrey Vedenkin
+          <div>
+            <Text fw={500} size="lg">
+              {eventType.name}
             </Text>
-          </Group>
-
-          <Title order={3} fw={700}>
-            {eventType.name}
-          </Title>
+            <Text size="sm" c="dimmed" mt={2}>
+              {eventType.description}
+            </Text>
+          </div>
 
           <Group gap="xs">
             <IconClock size={16} color="#909296" />
             <Text size="sm" c="dimmed">
               {eventType.durationMinutes}m
-            </Text>
-          </Group>
-
-          <Group gap="xs">
-            <IconVideo size={16} color="#909296" />
-            <Text size="sm" c="dimmed">
-              Cal Video
             </Text>
           </Group>
 
