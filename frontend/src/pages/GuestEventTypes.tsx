@@ -12,7 +12,6 @@ import {
   Badge,
   Loader,
   Center,
-  Switch,
   ActionIcon,
   Tooltip,
 } from '@mantine/core';
@@ -22,8 +21,8 @@ import {
   IconClock,
   IconExternalLink,
   IconLink,
-  IconDots,
 } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
 import { eventTypesApi } from '@/api/eventTypes';
 import { CreateEventTypeModal } from '@/components/CreateEventTypeModal';
 import type { EventType } from '@/types';
@@ -146,26 +145,16 @@ export function GuestEventTypes() {
                   </Stack>
 
                   <Group gap="xs" align="center">
-                    <Switch
-                      size="md"
-                      color="green"
-                      defaultChecked
-                      styles={{
-                        track: {
-                          cursor: 'pointer',
-                        },
-                      }}
-                    />
-                    <Tooltip label="Открыть">
-                      <ActionIcon
-                        variant="subtle"
-                        color="gray"
-                        component={Link}
-                        to={`/event-types/${et.id}`}
-                      >
-                        <IconExternalLink size={18} />
-                      </ActionIcon>
-                    </Tooltip>
+                    <Button
+                      component={Link}
+                      to={`/event-types/${et.id}`}
+                      variant="light"
+                      color="blue"
+                      size="compact-sm"
+                      rightSection={<IconExternalLink size={14} />}
+                    >
+                      Забронировать
+                    </Button>
                     <Tooltip label="Копировать ссылку">
                       <ActionIcon
                         variant="subtle"
@@ -174,14 +163,13 @@ export function GuestEventTypes() {
                           navigator.clipboard.writeText(
                             `${window.location.origin}/event-types/${et.id}`,
                           );
+                          notifications.show({
+                            message: 'Ссылка скопирована',
+                            color: 'green',
+                          });
                         }}
                       >
                         <IconLink size={18} />
-                      </ActionIcon>
-                    </Tooltip>
-                    <Tooltip label="Ещё">
-                      <ActionIcon variant="subtle" color="gray">
-                        <IconDots size={18} />
                       </ActionIcon>
                     </Tooltip>
                   </Group>

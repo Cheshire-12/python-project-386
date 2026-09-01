@@ -15,8 +15,10 @@ import {
   Loader,
   Paper,
   SimpleGrid,
+  ActionIcon,
+  Tooltip,
 } from '@mantine/core';
-import { IconPlus, IconClock } from '@tabler/icons-react';
+import { IconPlus, IconClock, IconPencil, IconTrash } from '@tabler/icons-react';
 import { adminApi } from '@/api/admin';
 import { AdminSidebar } from '@/components/AdminSidebar';
 import type { EventType, EventTypeCreate } from '@/types';
@@ -25,13 +27,24 @@ export function AdminEventTypes() {
   const [eventTypes, setEventTypes] = useState<EventType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState<EventTypeCreate>({
     name: '',
     description: '',
     durationMinutes: 30,
   });
+
+  const [editingType, setEditingType] = useState<EventType | null>(null);
+  const [editForm, setEditForm] = useState<EventTypeCreate>({
+    name: '',
+    description: '',
+    durationMinutes: 30,
+  });
+  const [saving, setSaving] = useState(false);
+
+  const [deletingType, setDeletingType] = useState<EventType | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -50,13 +63,50 @@ export function AdminEventTypes() {
     setCreating(true);
     try {
       await adminApi.eventTypes.create(form);
-      setModalOpen(false);
+      setCreateModalOpen(false);
       setForm({ name: '', description: '', durationMinutes: 30 });
       load();
     } catch (err: any) {
       setError(err.message);
     } finally {
       setCreating(false);
+    }
+  };
+
+  const openEdit = (et: EventType) => {
+    setEditingType(et);
+    setEditForm({
+      name: et.name,
+      description: et.description,
+      durationMinutes: et.durationMinutes,
+    });
+  };
+
+  const handleUpdate = async () => {
+    if (!editingType) return;
+    setSaving(true);
+    try {
+      await adminApi.eventTypes.update(editingType.id, editForm);
+      setEditingType(null);
+      load();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletingType) return;
+    setDeleting(true);
+    try {
+      await adminApi.eventTypes.delete(deletingType.id);
+      setDeletingType(null);
+      load();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -75,7 +125,7 @@ export function AdminEventTypes() {
             <Title order={2}>Типы событий</Title>
             <Button
               leftSection={<IconPlus size={18} />}
-              onClick={() => setModalOpen(true)}
+              onClick={() => setCreateModalOpen(true)}
             >
               Создать
             </Button>
@@ -106,6 +156,7 @@ export function AdminEventTypes() {
                   <Table.Th>Название</Table.Th>
                   <Table.Th>Описание</Table.Th>
                   <Table.Th>Длительность</Table.Th>
+                  <Table.Th>Действия</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -123,6 +174,28 @@ export function AdminEventTypes() {
                         {et.durationMinutes} мин
                       </Badge>
                     </Table.Td>
+                    <Table.Td>
+                      <Group gap="xs">
+                        <Tooltip label="Редактировать">
+                          <ActionIcon
+                            variant="subtle"
+                            color="gray"
+                            onClick={() => openEdit(et)}
+                          >
+                            <IconPencil size={18} />
+                          </ActionIcon>
+                        </Tooltip>
+                        <Tooltip label="Удалить">
+                          <ActionIcon
+                            variant="subtle"
+                            color="red"
+                            onClick={() => setDeletingType(et)}
+                          >
+                            <IconTrash size={18} />
+                          </ActionIcon>
+                        </Tooltip>
+                      </Group>
+                    </Table.Td>
                   </Table.Tr>
                 ))}
               </Table.Tbody>
@@ -130,14 +203,16 @@ export function AdminEventTypes() {
           )}
         </Stack>
 
+        {/* Create modal */}
         <Modal
-          opened={modalOpen}
-          onClose={() => setModalOpen(false)}
+          opened={createModalOpen}
+          onClose={() => setCreateModalOpen(false)}
           title="Новый тип события"
           centered
           styles={{
             content: { backgroundColor: '#1a1b1e' },
             header: { backgroundColor: '#1a1b1e' },
+            title: { fontWeight: 700, fontSize: '1.25rem', color: '#fafafa' },
           }}
         >
           <Stack gap="md">
@@ -166,25 +241,118 @@ export function AdminEventTypes() {
                 setForm({
                   ...form,
                   durationMinutes:
-                    typeof val === 'number'
-                      ? val
-                      : parseInt(val) || 30,
+                    typeof val === 'number' ? val : parseInt(String(val)) || 30,
                 })
               }
               min={1}
-              step={30}
+              step={5}
               required
             />
             <Group justify="flex-end">
               <Button
                 variant="subtle"
                 color="gray"
-                onClick={() => setModalOpen(false)}
+                onClick={() => setCreateModalOpen(false)}
               >
                 Отмена
               </Button>
               <Button onClick={handleCreate} loading={creating}>
                 Создать
+              </Button>
+            </Group>
+          </Stack>
+        </Modal>
+
+        {/* Edit modal */}
+        <Modal
+          opened={editingType !== null}
+          onClose={() => setEditingType(null)}
+          title="Редактировать тип события"
+          centered
+          styles={{
+            content: { backgroundColor: '#1a1b1e' },
+            header: { backgroundColor: '#1a1b1e' },
+            title: { fontWeight: 700, fontSize: '1.25rem', color: '#fafafa' },
+          }}
+        >
+          <Stack gap="md">
+            <TextInput
+              label="Название"
+              placeholder="Консультация"
+              value={editForm.name}
+              onChange={(e) =>
+                setEditForm({ ...editForm, name: e.currentTarget.value })
+              }
+              required
+            />
+            <Textarea
+              label="Описание"
+              placeholder="Краткое описание события"
+              value={editForm.description}
+              onChange={(e) =>
+                setEditForm({
+                  ...editForm,
+                  description: e.currentTarget.value,
+                })
+              }
+              required
+            />
+            <NumberInput
+              label="Длительность (мин)"
+              value={editForm.durationMinutes}
+              onChange={(val) =>
+                setEditForm({
+                  ...editForm,
+                  durationMinutes:
+                    typeof val === 'number' ? val : parseInt(String(val)) || 30,
+                })
+              }
+              min={1}
+              step={5}
+              required
+            />
+            <Group justify="flex-end">
+              <Button
+                variant="subtle"
+                color="gray"
+                onClick={() => setEditingType(null)}
+              >
+                Отмена
+              </Button>
+              <Button onClick={handleUpdate} loading={saving}>
+                Сохранить
+              </Button>
+            </Group>
+          </Stack>
+        </Modal>
+
+        {/* Delete confirmation modal */}
+        <Modal
+          opened={deletingType !== null}
+          onClose={() => setDeletingType(null)}
+          title="Удалить тип события?"
+          centered
+          styles={{
+            content: { backgroundColor: '#1a1b1e' },
+            header: { backgroundColor: '#1a1b1e' },
+            title: { fontWeight: 700, fontSize: '1.25rem', color: '#fafafa' },
+          }}
+        >
+          <Stack gap="md">
+            <Text c="dimmed">
+              Вы уверены, что хотите удалить «{deletingType?.name}»? Это действие
+              нельзя отменить.
+            </Text>
+            <Group justify="flex-end">
+              <Button
+                variant="subtle"
+                color="gray"
+                onClick={() => setDeletingType(null)}
+              >
+                Отмена
+              </Button>
+              <Button color="red" onClick={handleDelete} loading={deleting}>
+                Удалить
               </Button>
             </Group>
           </Stack>

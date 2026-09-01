@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { MantineProvider, createTheme } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
 import { Layout } from './components/Layout';
 import { LandingPage } from './pages/LandingPage';
 import { GuestEventTypes } from './pages/GuestEventTypes';
@@ -30,6 +31,7 @@ const theme = createTheme({
 function App() {
   return (
     <MantineProvider theme={theme} defaultColorScheme="dark">
+      <Notifications />
       <BrowserRouter>
         <Routes>
           <Route element={<Layout />}>

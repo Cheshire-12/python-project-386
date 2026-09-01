@@ -58,6 +58,19 @@ namespace CallCalendar {
       @doc("Создание типа события владельцем.")
       @post
       op create(@body body: EventTypeCreate): Created<EventType> | ValidationError;
+
+      @doc("Обновление типа события владельцем.")
+      @route("/{eventTypeId}")
+      @put
+      op update(
+        @path eventTypeId: EntityId,
+        @body body: EventTypeCreate,
+      ): EventType | NotFoundError | ValidationError;
+
+      @doc("Удаление типа события владельцем.")
+      @route("/{eventTypeId}")
+      @delete
+      op delete(@path eventTypeId: EntityId): void | NotFoundError;
     }
 
     @route("/bookings")
