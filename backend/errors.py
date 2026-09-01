@@ -33,3 +33,7 @@ def register_error_handlers(app):
         if error.details:
             body["details"] = error.details
         return jsonify(body), error.status_code
+
+    @app.errorhandler(405)
+    def handle_method_not_allowed(error):
+        return jsonify({"code": "METHOD_NOT_ALLOWED", "message": "Метод не разрешён"}), 405

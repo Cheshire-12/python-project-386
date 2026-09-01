@@ -18,6 +18,7 @@ import {
   ActionIcon,
   Tooltip,
 } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import { IconPlus, IconClock, IconPencil, IconTrash } from '@tabler/icons-react';
 import { adminApi } from '@/api/admin';
 import { AdminSidebar } from '@/components/AdminSidebar';
@@ -100,9 +101,22 @@ export function AdminEventTypes() {
     if (!deletingType) return;
     setDeleting(true);
     try {
-      await adminApi.eventTypes.delete(deletingType.id);
+      const result = await adminApi.eventTypes.delete(deletingType.id);
       setDeletingType(null);
       load();
+      if (result && result.deletedBookings > 0) {
+        notifications.show({
+          title: 'Удалено',
+          message: `Тип события удалён. Удалено бронирований: ${result.deletedBookings}`,
+          color: 'green',
+        });
+      } else {
+        notifications.show({
+          title: 'Удалено',
+          message: 'Тип события удалён',
+          color: 'green',
+        });
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -340,8 +354,11 @@ export function AdminEventTypes() {
         >
           <Stack gap="md">
             <Text c="dimmed">
-              Вы уверены, что хотите удалить «{deletingType?.name}»? Это действие
-              нельзя отменить.
+              Вы уверены, что хотите удалить «{deletingType?.name}»?
+            </Text>
+            <Text c="red" size="sm">
+              Все бронирования, связанные с этим событием, также будут удалены.
+              Это действие нельзя отменить.
             </Text>
             <Group justify="flex-end">
               <Button

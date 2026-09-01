@@ -4,6 +4,7 @@ import os
 
 from flask import Flask, send_from_directory
 from flask_cors import CORS
+from werkzeug.exceptions import NotFound
 
 from backend.errors import register_error_handlers
 from backend.routes.guest import guest_bp
@@ -24,6 +25,8 @@ def create_app() -> Flask:
     @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")
     def serve_frontend(path: str):
+        if path.startswith("api/"):
+            raise NotFound()
         full = os.path.join(FRONTEND_DIR, path)
         if path and os.path.isfile(full):
             return send_from_directory(FRONTEND_DIR, path)
