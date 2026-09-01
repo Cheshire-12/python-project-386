@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
+from backend.errors import NotFoundError
+
 
 _event_types: dict[int, dict[str, Any]] = {}
 _bookings: dict[int, dict[str, Any]] = {}
@@ -65,11 +67,14 @@ def update_event_type(
     return et
 
 
-def delete_event_type(event_type_id: int) -> bool:
+def delete_event_type(event_type_id: int) -> int:
     if event_type_id not in _event_types:
-        return False
+        return -1
     del _event_types[event_type_id]
-    return True
+    to_delete = [bid for bid, b in _bookings.items() if b["eventTypeId"] == event_type_id]
+    for bid in to_delete:
+        del _bookings[bid]
+    return len(to_delete)
 
 
 def list_event_types() -> list[dict[str, Any]]:

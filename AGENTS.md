@@ -66,7 +66,7 @@ make openapi           # cat dist/openapi.yaml
 
 ## Маршруты API (из operations.tsp)
 - Guest: GET /api/event-types, GET /api/event-types/{id}, GET /api/event-types/{id}/slots, POST /api/bookings, GET /api/bookings/{id}
-- Admin: GET /api/admin/event-types, POST /api/admin/event-types, GET /api/admin/bookings/upcoming
+- Admin: GET /api/admin/event-types, POST /api/admin/event-types, PUT /api/admin/event-types/{id}, DELETE /api/admin/event-types/{id}, GET /api/admin/bookings/upcoming
 
 ## Маршруты фронтенда (react-router-dom)
 - `/` — Лендинг
@@ -105,6 +105,38 @@ make openapi           # cat dist/openapi.yaml
 - Git push: commit 5750113
 
 **Изменённые файлы:** 17 (14 modified + 2 new + 1 untracked)
+
+### 2026-09-01 — CRUD типов событий + каскадное удаление + багфиксы
+
+**Сделано:**
+
+*Backend:*
+- PUT/DELETE эндпоинты для админского управления типами событий (`routes/admin.py`)
+- `update_event_type`, `delete_event_type` в `models.py`
+- Валидация `validate_event_type_update` с проверкой уникальности имени
+- Каскадное удаление бронирований при удалении типа события (`delete_event_type` возвращает количество удалённых бронирований)
+- DELETE endpoint возвращает JSON `{"deletedBookings": N}` вместо пустого 204
+- Добавлен импорт `NotFoundError` в `models.py` (фикс NameError при обновлении несуществующего типа)
+- Catch-all маршрут в `app.py` не перехватывает `/api/*` пути (возвращает 404 вместо отдачи HTML)
+- Обработчик 405 (Method Not Allowed) в `errors.py`
+- Обновлен OpenAPI спек (TypeSpec операции update/delete)
+
+*Frontend:*
+- AdminEventTypes: колонка «Действия» с кнопками Edit/Delete + модалки, предупреждение о каскадном удалении в модалке подтверждения
+- AdminUpcoming: убран столбец ID, название события вместо eventTypeId в столбце «Название»
+- GuestEventTypes: кнопка «Забронировать» вместо ActionIcon, flash при копировании ссылки, убрана кнопка «Ещё»
+- GuestBooking: вместо имени хоста — название и описание события, убрана Cal Video
+- CreateEventTypeModal: добавлено поле описание (fix 400 ошибки)
+- Клиент API: добавлены методы put/delete, `delete` возвращает JSON
+- `DeleteEventTypeResult` тип в `admin.ts`
+- Установлен `@mantine/notifications` для flash-сообщений
+
+**Изменённые файлы:** 15
+
+**Коммиты:**
+- `5750113` — Dark theme + Flask serves frontend
+- `d3d26be` — CRUD типов событий + улучшения UI
+- (текущий) — Каскадное удаление + багфиксы
 
 ## Важные замечания
 - .github/workflows/hexlet-check.yml и .github/workflows/README.md — служебные файлы Hexlet: их **нельзя редактировать, удалять или переименовывать.**

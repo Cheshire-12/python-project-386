@@ -51,9 +51,10 @@ def update_type(event_type_id: int):
 
 @admin_bp.route("/event-types/<int:event_type_id>", methods=["DELETE"])
 def delete_type(event_type_id: int):
-    if not delete_event_type(event_type_id):
+    deleted_bookings = delete_event_type(event_type_id)
+    if deleted_bookings < 0:
         raise NotFoundError(f"Тип события {event_type_id} не найден")
-    return "", 204
+    return jsonify({"deletedBookings": deleted_bookings})
 
 
 @admin_bp.route("/bookings/upcoming", methods=["GET"])
