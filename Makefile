@@ -1,4 +1,4 @@
-.PHONY: spec spec-watch dev backend-run frontend-dev preview openapi help prism-mock prism-proxy prism-stop frontend-install frontend-build
+.PHONY: spec spec-watch dev backend-run frontend-dev preview openapi help prism-mock prism-proxy prism-stop frontend-install frontend-build test-e2e test-e2e-ui test-e2e-report
 
 spec:
 	npx tsp compile typespec --emit @typespec/openapi3 --output-dir dist
@@ -37,6 +37,15 @@ prism-proxy:
 prism-stop:
 	@pkill -f "@stoplight/prism-cli" || true
 
+test-e2e:
+	cd frontend && npx playwright test
+
+test-e2e-ui:
+	cd frontend && npx playwright test --ui
+
+test-e2e-report:
+	cd frontend && npx playwright show-report
+
 help:
 	@echo "Available targets:"
 	@echo "  make spec            - Compile TypeSpec to OpenAPI 3.0"
@@ -48,6 +57,9 @@ help:
 	@echo "  make frontend-build  - Build frontend for production"
 	@echo "  make preview         - Preview production build"
 	@echo "  make openapi         - Display the OpenAPI spec"
+	@echo "  make test-e2e        - Run Playwright E2E tests"
+	@echo "  make test-e2e-ui     - Run Playwright E2E tests with UI mode"
+	@echo "  make test-e2e-report - Show Playwright HTML report"
 	@echo "  make prism-mock      - Start Prism mock server (port 4010)"
 	@echo "  make prism-proxy     - Start Prism proxy to backend"
 	@echo "  make prism-stop      - Stop Prism server"
