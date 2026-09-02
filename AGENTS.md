@@ -77,7 +77,7 @@ make openapi           # cat dist/openapi.yaml
 - `/admin/upcoming` — Предстоящие встречи
 
 ## Требования к окружению
-- Node.js 18+ для фронтенда и Prism
+- Node.js 20+ для фронтенда, Prism и Playwright
 - Python 3.12+ + Flask + SQLite для бэкенда (заготовка на порту 8000)
 - `make frontend-install` — установить зависимости фронтенда
 - `make spec` — сгенерировать OpenAPI перед запуском
@@ -137,6 +137,50 @@ make openapi           # cat dist/openapi.yaml
 - `5750113` — Dark theme + Flask serves frontend
 - `d3d26be` — CRUD типов событий + улучшения UI
 - (текущий) — Каскадное удаление + багфиксы
+
+### 2026-09-02 — E2E-тесты + CI/CD + release-please
+
+**Сделано:**
+
+*Playwright E2E:*
+- 13 тестов, покрывающих основные сценарии:
+  - `landing.spec.ts` — заголовок, таймзона, навигация (3)
+  - `event-types.spec.ts` — создание через API/модалку, поиск, кнопка «Забронировать» (4)
+  - `booking.spec.ts` — полный флоу бронирования, ошибка 404 (2)
+  - `admin.spec.ts` — sidebar, CRUD событий, upcoming meetings (4)
+- `frontend/playwright.config.ts` — конфигурация (workers: 1, chromium, webServer для Flask + Vite)
+- `frontend/tests/fixtures/api.ts` — API-хелпер для прямых запросов к бэкенду
+- `frontend/tests/fixtures/test.ts` — кастомные фикстуры: `createTestEvent`, `createTestBooking`, `getAvailableSlot`
+
+*CI/CD:*
+- `.github/workflows/e2e.yml` — запуск E2E тестов на push/PR в main (Python 3.12 + Node 20 + Chromium)
+- `.github/workflows/release-please.yml` — автоматические release-PR + CHANGELOG
+- `release-please-config.json` — simple release-type, changelog-sections
+- `.release-please-manifest.json` — текущая версия 0.1.0
+
+*Conventional Commits:*
+- Правила формата коммитов зафиксированы в AGENTS.md
+
+**Коммиты:**
+- `d2b0f0e` — ci: добавить E2E-тесты Playwright + release-please + Conventional Commits
+- `9a1bd6b` — fix(ci): обновить Node.js до 20 для Playwright
+
+**Баги, исправленные по ходу:**
+- Playwright требует Node.js 20+ (в workflow стоял 18)
+- `GITHUB_TOKEN` нужен read/write доступ для создания PR'ов release-please (настройки репозитория → Actions → Workflow permissions → Read and write permissions)
+
+**Результат:**
+- Release-please автоматически создал PR `chore(main): release call-calendar 0.1.1` с CHANGELOG
+- GitHub Release `call-calendar-v0.1.1` создан автоматически после мёрджа
+
+**Полезные команды:**
+```bash
+make test-e2e          # headless запуск
+make test-e2e-ui       # с UI
+make test-e2e-report   # HTML-отчёт
+gh pr list --state open  #смотреть open PR'ы
+gh run list --limit 5    #смотреть запуски workflows
+```
 
 ## Conventional Commits
 
