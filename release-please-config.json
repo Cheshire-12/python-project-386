@@ -1,0 +1,20 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "package-name": "call-calendar",
+      "changelog-sections": [
+        { "type": "feat", "section": "Features" },
+        { "type": "fix", "section": "Bug Fixes" },
+        { "type": "docs", "section": "Documentation" },
+        { "type": "refactor", "section": "Refactoring" },
+        { "type": "ci", "section": "CI/CD", "hidden": true },
+        { "type": "chore", "section": "Misc", "hidden": true },
+        { "type": "test", "section": "Tests", "hidden": true },
+        { "type": "style", "hidden": true }
+      ],
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true
+    }
+  }
+}

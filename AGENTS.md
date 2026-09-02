@@ -138,5 +138,45 @@ make openapi           # cat dist/openapi.yaml
 - `d3d26be` — CRUD типов событий + улучшения UI
 - (текущий) — Каскадное удаление + багфиксы
 
+## Conventional Commits
+
+Все коммиты в проекте должны следовать формату [Conventional Commits](https://www.conventionalcommits.org/).
+
+### Формат
+```
+<type>(<scope>): <description>
+
+[optional body]
+```
+
+### Типы коммитов
+| Тип | Описание | Semver bump |
+|-----|----------|-------------|
+| `feat` | Новый функционал | minor |
+| `fix` | Исправление бага | patch |
+| `docs` | Документация | — |
+| `style` | Форматирование (не влияет на логику) | — |
+| `refactor` | Рефакторинг без изменения API | — |
+| `test` | Тесты | — |
+| `ci` | CI/CD конфигурация | — |
+| `chore` | Сборка, зависимости, прочее | — |
+
+### Scopes
+- `backend` — бэкенд (Flask, Python)
+- `frontend` — фронтенд (React, TypeScript)
+- `typespec` — спецификация API
+- `ci` — CI/CD, GitHub Actions
+
+### Breaking changes
+Добавить `!` после типа или `BREAKING CHANGE:` в теле коммита для major version bump.
+
+### Примеры
+```
+feat(frontend): dark theme для календаря
+fix(backend): каскадное удаление бронирований
+ci: добавить E2E-тесты в GitHub Actions
+feat!: изменение формата API ответа (BREAKING CHANGE)
+```
+
 ## Важные замечания
 - .github/workflows/hexlet-check.yml и .github/workflows/README.md — служебные файлы Hexlet: их **нельзя редактировать, удалять или переименовывать.**
