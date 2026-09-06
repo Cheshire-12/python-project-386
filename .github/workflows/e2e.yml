@@ -14,13 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
 
       - name: Install Python dependencies
-        run: pip install -r requirements.txt
+        run: uv sync
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -38,9 +36,9 @@ jobs:
         working-directory: frontend
 
       - name: Start Flask backend
-        run: python -m flask run --port 8000 &
+        run: uv run flask run --port 8000 &
         env:
-          FLASK_APP: backend.app
+          FLASK_APP: "backend.app:create_app"
 
       - name: Run E2E tests
         run: npx playwright test

@@ -1,4 +1,4 @@
-.PHONY: spec spec-watch dev backend-run frontend-dev preview openapi help prism-mock prism-proxy prism-stop frontend-install frontend-build test-e2e test-e2e-ui test-e2e-report
+.PHONY: spec spec-watch dev backend-run backend-install frontend-dev preview openapi help prism-mock prism-proxy prism-stop frontend-install frontend-build test-install test-e2e test-e2e-ui test-e2e-report docker-build docker-run docker-up docker-down
 
 spec:
 	npx tsp compile typespec --emit @typespec/openapi3 --output-dir dist
@@ -10,8 +10,11 @@ spec-watch:
 
 dev: backend-run frontend-dev
 
+backend-install:
+	uv sync
+
 backend-run:
-	FLASK_APP=backend.app flask run --port 8000
+	FLASK_APP=backend.app:create_app uv run flask run --port 8000
 
 frontend-dev:
 	cd frontend && npm run dev
@@ -37,6 +40,9 @@ prism-proxy:
 prism-stop:
 	@pkill -f "@stoplight/prism-cli" || true
 
+test-install:
+	cd frontend && npx playwright install chromium
+
 test-e2e:
 	cd frontend && npx playwright test
 
@@ -46,20 +52,38 @@ test-e2e-ui:
 test-e2e-report:
 	cd frontend && npx playwright show-report
 
+docker-build:
+	docker build -t call-calendar .
+
+docker-run:
+	docker run -p 8000:8000 -e DATABASE_URL=/app/data/calendar.db call-calendar
+
+docker-up:
+	docker compose up
+
+docker-down:
+	docker compose down
+
 help:
 	@echo "Available targets:"
 	@echo "  make spec            - Compile TypeSpec to OpenAPI 3.0"
 	@echo "  make spec-watch      - Watch-mode TypeSpec compilation"
 	@echo "  make dev             - Start Flask backend + Vite dev server"
+	@echo "  make backend-install - Install Python dependencies (uv sync)"
 	@echo "  make backend-run     - Start Flask backend (port 8000)"
 	@echo "  make frontend-dev    - Start Vite dev server (port 3000)"
 	@echo "  make frontend-install- Install frontend dependencies"
 	@echo "  make frontend-build  - Build frontend for production"
 	@echo "  make preview         - Preview production build"
 	@echo "  make openapi         - Display the OpenAPI spec"
+	@echo "  make test-install    - Install Playwright Chromium browser"
 	@echo "  make test-e2e        - Run Playwright E2E tests"
 	@echo "  make test-e2e-ui     - Run Playwright E2E tests with UI mode"
 	@echo "  make test-e2e-report - Show Playwright HTML report"
 	@echo "  make prism-mock      - Start Prism mock server (port 4010)"
 	@echo "  make prism-proxy     - Start Prism proxy to backend"
 	@echo "  make prism-stop      - Stop Prism server"
+	@echo "  make docker-build    - Build Docker image"
+	@echo "  make docker-run      - Run Docker container"
+	@echo "  make docker-up       - Start docker-compose (dev)"
+	@echo "  make docker-down     - Stop docker-compose"

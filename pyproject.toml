@@ -1,0 +1,23 @@
+[project]
+name = "call-calendar"
+version = "0.1.1"
+description = "Календарь звонков"
+requires-python = ">=3.12"
+dependencies = [
+    "flask",
+    "flask-cors",
+    "gunicorn",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-flask",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["backend"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

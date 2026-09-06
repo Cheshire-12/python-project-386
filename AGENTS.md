@@ -4,25 +4,37 @@
 ## Обзор проекта
 Веб-приложение "Календарь звонков": бэкенд на Flask (Python >= 3.12) + SQLite, API-контракт задан через TypeSpec (`typespec/main.tsp`, `typespec/models.tsp`, `typespec/operations.tsp`), фронтенд на React 19 + TypeScript + Vite + Mantine 9, Prism для мокирования API при разработке.
 - **Подход Design First**: контракт задается до реализации
-- **Бэкенд отдельно**: Flask + SQLite (заготовка есть, отдаёт API + фронтенд)
+- **Бэкенд отдельно**: Flask + SQLite (данные сохраняются в `data/calendar.db`)
+- **Управление зависимостями**: uv + pyproject.toml (hatchling)
 - **Фронтенд**: `frontend/` — отдельный Vite-проект с React + Mantine
 - **Таймзона**: `Europe/Moscow` (единая для всего календаря)
 - **Бэкенд**: Flask на порту 8000 (порт 5000 занят macOS AirPlay)
 
 ## Структура проекта
+- `pyproject.toml` — зависимости проекта (uv, hatchling)
 - `typespec/` — спецификация TypeSpec (3 файла): эндпоинты, модели, операции
 - `dist/` — генерируемый OpenAPI 3.0 (`make spec`)
+- `backend/` — Flask бэкенд
+  - `app.py` — create_app, CORS, blueprints, catch-all маршрут
+  - `errors.py` — обработка ошибок (ApiError, NotFound, Conflict, Validation)
+  - `models.py` — SQLite хранилище (event_types, bookings)
+  - `routes/guest.py` — публичное API (guest_bp)
+  - `routes/admin.py` — админское API (admin_bp)
+  - `services/slots.py` — генерация слотов (30-мин сетка, Europe/Moscow)
+  - `services/validation.py` — валидация входных данных
 - `frontend/` — React + Vite + Mantine фронтенд
   - `src/api/` — API-клиент (fetch-обёртка)
   - `src/types/` — TypeScript-типы из OpenAPI
-  - `src/pages/` — Страницы (Landing, Guest, Admin)
-  - `src/components/` — Переиспользуемые компоненты
+  - `src/pages/` — Страницы (Landing, GuestEventTypes, GuestBooking, BookingConfirmation, AdminEventTypes, AdminUpcoming)
+  - `src/components/` — Переиспользуемые компоненты (Header, Layout, SlotPicker, BookingForm, CreateEventTypeModal, AdminSidebar)
+  - `tests/` — E2E тесты (Playwright)
 - `Makefile` — автоматизация: `make dev`, `make spec`, `make prism-mock`
 - `prism.yaml` — конфигурация Prism HTTP mock/proxy (порт 4010)
 
 ## Ключевые команды
 ```bash
 # Установка зависимостей
+make backend-install     # Python зависимости (uv sync)
 make frontend-install    # cd frontend && npm install
 
 # Спецификация
@@ -31,11 +43,17 @@ make spec-watch        # режим слежения
 
 # Разработка (Flask backend + Vite dev server)
 make dev               # make backend-run + make frontend-dev
-make backend-run       # cd backend && flask run --port 8000
+make backend-run       # uv run flask run --port 8000
 make frontend-dev      # cd frontend && npm run dev (порт 3000)
 
 # Сборка
 make frontend-build    # production сборка
+
+# E2E тесты
+make test-install       # установить Chromium для Playwright
+make test-e2e          # запуск Playwright тестов
+make test-e2e-ui       # запуск с UI-режимом
+make test-e2e-report   # HTML-отчёт
 
 # Prism
 make prism-mock        # Prism mock server (порт 4010)
@@ -78,11 +96,15 @@ make openapi           # cat dist/openapi.yaml
 
 ## Требования к окружению
 - Node.js 20+ для фронтенда, Prism и Playwright
-- Python 3.12+ + Flask + SQLite для бэкенда (заготовка на порту 8000)
+- Python 3.12+ для бэкенда
+- uv — управление зависимостями Python
+- `uv sync` — установить Python зависимости
 - `make frontend-install` — установить зависимости фронтенда
+- `make test-install` — установить Chromium для Playwright E2E тестов
 - `make spec` — сгенерировать OpenAPI перед запуском
 
 ### Возможные подводные камни
+- Данные хранятся в SQLite (`data/calendar.db`)
 - dist/openapi.yaml отсутствует — сгенерировать через make spec
 - Prism mock отдает ответы по контракту до того, как бэкенд готов — полезен для фронтенд-разработки
 - Vite проксирует `/api` на `http://localhost:8000` (Flask)
@@ -221,6 +243,20 @@ fix(backend): каскадное удаление бронирований
 ci: добавить E2E-тесты в GitHub Actions
 feat!: изменение формата API ответа (BREAKING CHANGE)
 ```
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default canonical labels. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout. See `docs/agents/domain.md`.
 
 ## Важные замечания
 - .github/workflows/hexlet-check.yml и .github/workflows/README.md — служебные файлы Hexlet: их **нельзя редактировать, удалять или переименовывать.**

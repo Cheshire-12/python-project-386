@@ -24,7 +24,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'cd .. && FLASK_APP=backend.app flask run --port 8000',
+      command: 'cd .. && FLASK_APP=backend.app:create_app uv run flask run --port 8000',
       port: API_PORT,
       reuseExistingServer: true,
       timeout: 15_000,

@@ -1,84 +1,132 @@
 from __future__ import annotations
 
+import os
+import sqlite3
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from backend.errors import NotFoundError
+from flask import current_app, g
+
+from backend.errors import ConflictError, NotFoundError
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS event_types (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    description TEXT NOT NULL DEFAULT '',
+    duration_minutes INTEGER NOT NULL DEFAULT 30
+);
+
+CREATE TABLE IF NOT EXISTS bookings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_type_id INTEGER NOT NULL REFERENCES event_types(id) ON DELETE CASCADE,
+    guest_name TEXT NOT NULL,
+    phone TEXT,
+    email TEXT,
+    starts_at TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+"""
 
 
-_event_types: dict[int, dict[str, Any]] = {}
-_bookings: dict[int, dict[str, Any]] = {}
-_event_type_counter: int = 0
-_booking_counter: int = 0
+def get_db() -> sqlite3.Connection:
+    if "db" not in g:
+        db = sqlite3.connect(current_app.config["DATABASE"])
+        db.row_factory = sqlite3.Row
+        db.execute("PRAGMA foreign_keys = ON")
+        g.db = db
+    return g.db
+
+
+def close_db(e: Any = None) -> None:
+    db = g.pop("db", None)
+    if db is not None:
+        db.close()
+
+
+def init_db(app: Any) -> None:
+    db_path = app.config["DATABASE"]
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    db = sqlite3.connect(db_path)
+    db.executescript(SCHEMA)
+    db.close()
+    app.teardown_appcontext(close_db)
 
 
 def reset() -> None:
-    global _event_type_counter, _booking_counter
-    _event_types.clear()
-    _bookings.clear()
-    _event_type_counter = 0
-    _booking_counter = 0
-
-
-def next_event_type_id() -> int:
-    global _event_type_counter
-    _event_type_counter += 1
-    return _event_type_counter
-
-
-def next_booking_id() -> int:
-    global _booking_counter
-    _booking_counter += 1
-    return _booking_counter
+    db = get_db()
+    db.execute("DELETE FROM bookings")
+    db.execute("DELETE FROM event_types")
+    db.execute("DELETE FROM sqlite_sequence WHERE name IN ('event_types', 'bookings')")
+    db.commit()
 
 
 def create_event_type(name: str, description: str, duration_minutes: int) -> dict[str, Any]:
-    for et in _event_types.values():
-        if et["name"] == name:
-            from backend.errors import ConflictError
-            raise ConflictError(f"Тип события с именем '{name}' уже существует")
-    et = {
-        "id": next_event_type_id(),
-        "name": name,
-        "description": description,
-        "durationMinutes": duration_minutes,
-    }
-    _event_types[et["id"]] = et
-    return et
+    db = get_db()
+    try:
+        cur = db.execute(
+            "INSERT INTO event_types (name, description, duration_minutes) VALUES (?, ?, ?)",
+            (name, description, duration_minutes),
+        )
+        db.commit()
+    except sqlite3.IntegrityError:
+        raise ConflictError(f"Тип события с именем '{name}' уже существует")
+    return dict(db.execute(
+        "SELECT id, name, description, duration_minutes AS durationMinutes FROM event_types WHERE id = ?",
+        (cur.lastrowid,),
+    ).fetchone())
 
 
 def get_event_type(event_type_id: int) -> dict[str, Any] | None:
-    return _event_types.get(event_type_id)
+    db = get_db()
+    row = db.execute(
+        "SELECT id, name, description, duration_minutes AS durationMinutes FROM event_types WHERE id = ?",
+        (event_type_id,),
+    ).fetchone()
+    return dict(row) if row else None
 
 
 def update_event_type(
     event_type_id: int, name: str, description: str, duration_minutes: int
 ) -> dict[str, Any]:
-    et = _event_types.get(event_type_id)
-    if et is None:
+    db = get_db()
+    existing = db.execute("SELECT id FROM event_types WHERE id = ?", (event_type_id,)).fetchone()
+    if existing is None:
         raise NotFoundError(f"Тип события {event_type_id} не найден")
-    for other in _event_types.values():
-        if other["id"] != event_type_id and other["name"] == name:
-            from backend.errors import ConflictError
-            raise ConflictError(f"Тип события с именем '{name}' уже существует")
-    et["name"] = name
-    et["description"] = description
-    et["durationMinutes"] = duration_minutes
-    return et
+    try:
+        db.execute(
+            "UPDATE event_types SET name = ?, description = ?, duration_minutes = ? WHERE id = ?",
+            (name, description, duration_minutes, event_type_id),
+        )
+        db.commit()
+    except sqlite3.IntegrityError:
+        raise ConflictError(f"Тип события с именем '{name}' уже существует")
+    return dict(db.execute(
+        "SELECT id, name, description, duration_minutes AS durationMinutes FROM event_types WHERE id = ?",
+        (event_type_id,),
+    ).fetchone())
 
 
 def delete_event_type(event_type_id: int) -> int:
-    if event_type_id not in _event_types:
+    db = get_db()
+    existing = db.execute("SELECT id FROM event_types WHERE id = ?", (event_type_id,)).fetchone()
+    if existing is None:
         return -1
-    del _event_types[event_type_id]
-    to_delete = [bid for bid, b in _bookings.items() if b["eventTypeId"] == event_type_id]
-    for bid in to_delete:
-        del _bookings[bid]
-    return len(to_delete)
+    count = db.execute(
+        "SELECT COUNT(*) FROM bookings WHERE event_type_id = ?", (event_type_id,)
+    ).fetchone()[0]
+    db.execute("DELETE FROM bookings WHERE event_type_id = ?", (event_type_id,))
+    db.execute("DELETE FROM event_types WHERE id = ?", (event_type_id,))
+    db.commit()
+    return count
 
 
 def list_event_types() -> list[dict[str, Any]]:
-    return list(_event_types.values())
+    db = get_db()
+    rows = db.execute(
+        "SELECT id, name, description, duration_minutes AS durationMinutes FROM event_types"
+    ).fetchall()
+    return [dict(r) for r in rows]
 
 
 def create_booking(
@@ -88,28 +136,41 @@ def create_booking(
     phone: str | None = None,
     email: str | None = None,
 ) -> dict[str, Any]:
-    now = datetime.now(timezone.utc)
-    booking = {
-        "id": next_booking_id(),
-        "eventTypeId": event_type_id,
-        "guestName": guest_name,
-        "startsAt": starts_at.isoformat(),
-        "createdAt": now.isoformat(),
-    }
-    if phone:
-        booking["phone"] = phone
-    if email:
-        booking["email"] = email
-    _bookings[booking["id"]] = booking
-    return booking
+    db = get_db()
+    now = datetime.now(timezone.utc).isoformat()
+    cur = db.execute(
+        "INSERT INTO bookings (event_type_id, guest_name, phone, email, starts_at, created_at) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (event_type_id, guest_name, phone, email, starts_at.isoformat(), now),
+    )
+    db.commit()
+    return dict(db.execute(
+        "SELECT id, event_type_id AS eventTypeId, guest_name AS guestName, "
+        "phone, email, starts_at AS startsAt, created_at AS createdAt "
+        "FROM bookings WHERE id = ?",
+        (cur.lastrowid,),
+    ).fetchone())
 
 
 def get_booking(booking_id: int) -> dict[str, Any] | None:
-    return _bookings.get(booking_id)
+    db = get_db()
+    row = db.execute(
+        "SELECT id, event_type_id AS eventTypeId, guest_name AS guestName, "
+        "phone, email, starts_at AS startsAt, created_at AS createdAt "
+        "FROM bookings WHERE id = ?",
+        (booking_id,),
+    ).fetchone()
+    return dict(row) if row else None
 
 
 def list_all_bookings() -> list[dict[str, Any]]:
-    return list(_bookings.values())
+    db = get_db()
+    rows = db.execute(
+        "SELECT id, event_type_id AS eventTypeId, guest_name AS guestName, "
+        "phone, email, starts_at AS startsAt, created_at AS createdAt "
+        "FROM bookings"
+    ).fetchall()
+    return [dict(r) for r in rows]
 
 
 def find_conflicting_booking(
@@ -119,7 +180,7 @@ def find_conflicting_booking(
 ) -> dict[str, Any] | None:
     new_start = starts_at
     new_end = starts_at + timedelta(minutes=duration_minutes)
-    for b in _bookings.values():
+    for b in list_all_bookings():
         if exclude_booking_id is not None and b["id"] == exclude_booking_id:
             continue
         b_start = datetime.fromisoformat(b["startsAt"])
