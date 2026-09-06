@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/Cheshire-12/python-project-386/compare/call-calendar-v0.1.1...call-calendar-v0.1.2) (2026-09-06)
+
+
+### Documentation
+
+* добавить лог сессии 2026-09-02 (E2E + CI/CD + release-please) ([7402464](https://github.com/Cheshire-12/python-project-386/commit/740246408b80f21d443547100171070ff17f5e3b))
+
 ## [0.1.1](https://github.com/Cheshire-12/python-project-386/compare/call-calendar-v0.1.0...call-calendar-v0.1.1) (2026-09-02)
 
 
