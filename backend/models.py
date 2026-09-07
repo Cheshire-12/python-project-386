@@ -180,11 +180,12 @@ def find_conflicting_booking(
 ) -> dict[str, Any] | None:
     new_start = starts_at
     new_end = starts_at + timedelta(minutes=duration_minutes)
+    event_types = {et["id"]: et for et in list_event_types()}
     for b in list_all_bookings():
         if exclude_booking_id is not None and b["id"] == exclude_booking_id:
             continue
         b_start = datetime.fromisoformat(b["startsAt"])
-        et = get_event_type(b["eventTypeId"])
+        et = event_types.get(b["eventTypeId"])
         if et is None:
             continue
         b_end = b_start + timedelta(minutes=et["durationMinutes"])

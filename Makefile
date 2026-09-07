@@ -1,4 +1,4 @@
-.PHONY: spec spec-watch dev backend-run backend-install frontend-dev preview openapi help prism-mock prism-proxy prism-stop frontend-install frontend-build test-install test-e2e test-e2e-ui test-e2e-report docker-build docker-run docker-up docker-down
+.PHONY: spec spec-watch dev backend-run backend-install frontend-dev preview openapi help prism-mock prism-proxy prism-stop frontend-install frontend-build test test-install test-e2e test-e2e-ui test-e2e-report docker-build docker-run docker-up docker-down
 
 spec:
 	npx tsp compile typespec --emit @typespec/openapi3 --output-dir dist
@@ -39,6 +39,9 @@ prism-proxy:
 
 prism-stop:
 	@pkill -f "@stoplight/prism-cli" || true
+
+test:
+	uv run pytest tests/ -v
 
 test-install:
 	cd frontend && npx playwright install chromium
@@ -83,6 +86,7 @@ help:
 	@echo "  make prism-mock      - Start Prism mock server (port 4010)"
 	@echo "  make prism-proxy     - Start Prism proxy to backend"
 	@echo "  make prism-stop      - Stop Prism server"
+	@echo "  make test            - Run unit tests (pytest)"
 	@echo "  make docker-build    - Build Docker image"
 	@echo "  make docker-run      - Run Docker container"
 	@echo "  make docker-up       - Start docker-compose (dev)"

@@ -37,6 +37,7 @@ export function AdminUpcoming() {
   }, []);
 
   const eventTypeMap = new Map(eventTypes.map((et) => [et.id, et.name]));
+  const eventTypeDurationMap = new Map(eventTypes.map((et) => [et.id, et.durationMinutes]));
 
   return (
     <SimpleGrid cols={{ base: 1, md: 4 }} spacing={0}>
@@ -75,6 +76,7 @@ export function AdminUpcoming() {
                   <Table.Th>Гость</Table.Th>
                   <Table.Th>Время</Table.Th>
                   <Table.Th>Название</Table.Th>
+                  <Table.Th>Длительность</Table.Th>
                   <Table.Th>Контакты</Table.Th>
                 </Table.Tr>
               </Table.Thead>
@@ -96,6 +98,11 @@ export function AdminUpcoming() {
                     <Table.Td>
                       <Text fw={500}>
                         {eventTypeMap.get(b.eventTypeId) ?? `#${b.eventTypeId}`}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="sm" c="dimmed">
+                        {eventTypeDurationMap.get(b.eventTypeId)} минут
                       </Text>
                     </Table.Td>
                     <Table.Td>

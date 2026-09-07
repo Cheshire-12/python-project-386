@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from backend.errors import ValidationError
 from backend.models import get_event_type, list_event_types
+
+BOOKING_WINDOW_DAYS = 14
 
 
 def validate_event_type_create(data: dict) -> None:
@@ -71,6 +73,15 @@ def validate_booking_create(data: dict) -> None:
             parsed = datetime.fromisoformat(starts_at.replace("Z", "+00:00"))
             if parsed.tzinfo is None:
                 errors.append("startsAt: время должно содержать информацию о часовой зоне")
+            else:
+                now = datetime.now(timezone.utc)
+                window_end = now + timedelta(days=BOOKING_WINDOW_DAYS)
+                if parsed < now:
+                    errors.append("startsAt: время бронирования не может быть в прошлом")
+                elif parsed >= window_end:
+                    errors.append(
+                        f"startsAt: время бронирования должно быть в пределах {BOOKING_WINDOW_DAYS} дней"
+                    )
         except (ValueError, TypeError):
             errors.append("startsAt: неверный формат ISO 8601")
 
