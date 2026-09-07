@@ -6,6 +6,7 @@ COPY frontend/ ./frontend/
 RUN cd frontend && npm run build
 
 FROM python:3.12-slim AS runtime
+RUN apt-get update && apt-get install -y --no-install-recommends bash && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
