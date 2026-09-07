@@ -1,4 +1,4 @@
-FROM node:18-alpine AS frontend-build
+FROM node:20-alpine AS frontend-build
 WORKDIR /app
 COPY frontend/package.json frontend/package-lock.json ./frontend/
 RUN cd frontend && npm ci
