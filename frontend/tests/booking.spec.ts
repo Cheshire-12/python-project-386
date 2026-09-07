@@ -3,16 +3,15 @@ import { test, expect } from './fixtures/test';
 test.describe('Booking flow', () => {
   test('full booking journey', async ({ page, createTestEvent }) => {
     const eventType = await createTestEvent({
-      name: 'Звонок Тест',
       description: 'Короткий звонок',
       durationMinutes: 30,
     });
 
     await page.goto(`/event-types/${eventType.id}`);
 
-    await expect(page.getByText('Звонок Тест', { exact: true })).toBeVisible();
+    await expect(page.getByText(eventType.name, { exact: true })).toBeVisible();
     await expect(page.getByText('Короткий звонок')).toBeVisible();
-    await expect(page.getByText('30m')).toBeVisible();
+    await expect(page.getByText('30m', { exact: true })).toBeVisible();
 
     const availableSlot = page.getByRole('button', { name: /^\d{2}:\d{2}$/ }).first();
     await expect(availableSlot).toBeVisible({ timeout: 10_000 });
