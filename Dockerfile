@@ -14,11 +14,13 @@ COPY backend/ ./backend/
 
 RUN pip install --no-cache-dir uv && uv sync --frozen --no-dev
 
+COPY docker/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 ENV DATABASE_URL=/app/data/calendar.db
 ENV FRONTEND_DIR=/app/frontend/dist
 ENV CORS_ORIGINS=*
-ENV PORT=8000
 
 EXPOSE 8000
 
-CMD ["gunicorn", "backend.app:create_app()", "--bind", "0.0.0.0:8000", "--timeout", "60"]
+CMD ["/app/entrypoint.sh"]
