@@ -150,6 +150,10 @@ make openapi
 - `DELETE /api/admin/event-types/:id` — удалить тип события (каскадно)
 - `GET /api/admin/bookings/upcoming` — предстоящие встречи
 
+## Деплой
+
+Приложение опубликовано на Render: [https://call-calendar-lq6n.onrender.com](https://call-calendar-lq6n.onrender.com)
+
 ## E2E тесты
 
 Для запуска тестов необходимо установить Chromium для Playwright:
