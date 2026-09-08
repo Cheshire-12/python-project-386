@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-import os
-import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from backend.app import create_app
 from backend import models
+from backend.app import create_app
 from backend.errors import ConflictError, NotFoundError
 
 
@@ -82,7 +80,7 @@ class TestEventTypes:
 
     def test_delete_cascades_bookings(self):
         et = models.create_event_type("del", "desc", 30)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         models.create_booking(et["id"], now + timedelta(hours=1), "guest")
         models.create_booking(et["id"], now + timedelta(hours=2), "guest2")
         deleted = models.delete_event_type(et["id"])
@@ -95,7 +93,7 @@ class TestEventTypes:
 class TestBookings:
     def test_create_and_get(self):
         et = models.create_event_type("mtg", "meeting", 30)
-        starts = datetime.now(timezone.utc) + timedelta(hours=1)
+        starts = datetime.now(UTC) + timedelta(hours=1)
         b = models.create_booking(et["id"], starts, "Alice", phone="123", email="a@b.com")
         assert b["id"] == 1
         assert b["eventTypeId"] == et["id"]
@@ -110,7 +108,7 @@ class TestBookings:
 
     def test_create_booking_optional_fields(self):
         et = models.create_event_type("mtg", "meeting", 30)
-        starts = datetime.now(timezone.utc) + timedelta(hours=1)
+        starts = datetime.now(UTC) + timedelta(hours=1)
         b = models.create_booking(et["id"], starts, "Bob")
         assert b["guestName"] == "Bob"
         assert b["phone"] is None
@@ -121,7 +119,7 @@ class TestBookings:
 
     def test_list_all_bookings(self):
         et = models.create_event_type("mtg", "meeting", 30)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         models.create_booking(et["id"], now + timedelta(hours=1), "a")
         models.create_booking(et["id"], now + timedelta(hours=2), "b")
         result = models.list_all_bookings()
@@ -131,21 +129,21 @@ class TestBookings:
 class TestConflictDetection:
     def test_no_conflict_when_slots_disjoint(self):
         et = models.create_event_type("mtg", "meeting", 30)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         models.create_booking(et["id"], now + timedelta(hours=1), "a")
         conflict = models.find_conflicting_booking(now + timedelta(hours=2), 30)
         assert conflict is None
 
     def test_conflict_when_slots_overlap(self):
         et = models.create_event_type("mtg", "meeting", 30)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         models.create_booking(et["id"], now + timedelta(hours=1), "a")
         conflict = models.find_conflicting_booking(now + timedelta(hours=1), 30)
         assert conflict is not None
 
     def test_exclude_booking_from_conflict_check(self):
         et = models.create_event_type("mtg", "meeting", 30)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         b = models.create_booking(et["id"], now + timedelta(hours=1), "a")
         conflict = models.find_conflicting_booking(
             now + timedelta(hours=1), 30, exclude_booking_id=b["id"]
@@ -156,7 +154,7 @@ class TestConflictDetection:
 class TestReset:
     def test_reset_clears_all_data(self):
         et = models.create_event_type("mtg", "meeting", 30)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         models.create_booking(et["id"], now + timedelta(hours=1), "a")
         models.reset()
         assert models.list_event_types() == []

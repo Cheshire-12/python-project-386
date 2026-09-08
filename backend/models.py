@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import sqlite3
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from flask import current_app, g
@@ -137,7 +137,7 @@ def create_booking(
     email: str | None = None,
 ) -> dict[str, Any]:
     db = get_db()
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     cur = db.execute(
         "INSERT INTO bookings (event_type_id, guest_name, phone, email, starts_at, created_at) "
         "VALUES (?, ?, ?, ?, ?, ?)",

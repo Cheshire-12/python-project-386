@@ -7,8 +7,8 @@ from flask_cors import CORS
 from werkzeug.exceptions import NotFound
 
 from backend.errors import register_error_handlers
-from backend.routes.guest import guest_bp
 from backend.routes.admin import admin_bp
+from backend.routes.guest import guest_bp
 
 DEFAULT_FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend", "dist")
 
@@ -24,7 +24,7 @@ def create_app(frontend_dir: str | None = None, database: str | None = None) -> 
 
     CORS(app, origins=[o.strip() for o in cors_origins.split(",")])
 
-    from backend.models import init_db, close_db
+    from backend.models import init_db
 
     init_db(app)
 

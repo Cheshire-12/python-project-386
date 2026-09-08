@@ -1,11 +1,17 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from flask import Blueprint, jsonify, request
 
 from backend.errors import NotFoundError, ValidationError
-from backend.models import create_event_type, update_event_type, delete_event_type, list_event_types, list_all_bookings
+from backend.models import (
+    create_event_type,
+    delete_event_type,
+    list_all_bookings,
+    list_event_types,
+    update_event_type,
+)
 from backend.services.validation import validate_event_type_create, validate_event_type_update
 
 admin_bp = Blueprint("admin", __name__)
@@ -62,15 +68,15 @@ def upcoming():
     from_param = request.args.get("from")
 
     if from_param:
-        from_dt = datetime.fromisoformat(from_param.replace("Z", "+00:00")).astimezone(timezone.utc)
+        from_dt = datetime.fromisoformat(from_param).astimezone(UTC)
     else:
-        from_dt = datetime.now(timezone.utc)
+        from_dt = datetime.now(UTC)
 
     bookings = list_all_bookings()
 
     future = []
     for b in bookings:
-        starts = datetime.fromisoformat(b["startsAt"]).astimezone(timezone.utc)
+        starts = datetime.fromisoformat(b["startsAt"]).astimezone(UTC)
         if starts > from_dt:
             future.append(b)
 

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from backend.app import create_app
 from backend import models
-from backend.services.slots import generate_slots, MSK, SLOT_STEP
+from backend.app import create_app
+from backend.services.slots import MSK, generate_slots
 
 
 @pytest.fixture()
@@ -54,16 +54,16 @@ class TestGenerateSlots:
 
     def test_past_slots_are_unavailable(self):
         slots = generate_slots(30)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         past_slots = [s for s in slots if datetime.fromisoformat(s["start"]) < now]
         for slot in past_slots:
             assert slot["available"] is False
 
     def test_with_existing_booking_marks_slot_unavailable(self):
         et = models.create_event_type("1on1", "desc", 30)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         from_msk = now.astimezone(MSK).replace(hour=10, minute=0, second=0, microsecond=0)
-        booking_start = from_msk.astimezone(timezone.utc)
+        booking_start = from_msk.astimezone(UTC)
         models.create_booking(et["id"], booking_start, "Alice")
 
         from_dt = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -74,7 +74,7 @@ class TestGenerateSlots:
             assert booked_slot["available"] is False
 
     def test_custom_from_to_window(self):
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         from_dt = now + timedelta(hours=1)
         to_dt = from_dt + timedelta(hours=2)
         slots = generate_slots(30, from_dt=from_dt, to_dt=to_dt)
@@ -85,9 +85,9 @@ class TestGenerateSlots:
             assert start_msk < to_msk
 
     def test_slots_aligned_to_30_min_grid(self):
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         from_msk = now.astimezone(MSK).replace(hour=0, minute=0, second=0, microsecond=0)
-        from_dt = from_msk.astimezone(timezone.utc)
+        from_dt = from_msk.astimezone(UTC)
         to_dt = from_dt + timedelta(hours=3)
         slots = generate_slots(30, from_dt=from_dt, to_dt=to_dt)
         for slot in slots:

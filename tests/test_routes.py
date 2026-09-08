@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from backend.app import create_app
 from backend import models
+from backend.app import create_app
 
 
 @pytest.fixture()
@@ -30,7 +30,7 @@ def _reset(app):
 
 
 def _future_iso(hours=1):
-    return (datetime.now(timezone.utc) + timedelta(hours=hours)).isoformat()
+    return (datetime.now(UTC) + timedelta(hours=hours)).isoformat()
 
 
 class TestGuestEventTypes:
@@ -117,7 +117,7 @@ class TestGuestBookings:
 
     def test_get_booking(self, client):
         et = models.create_event_type("1on1", "Weekly sync", 30)
-        b = models.create_booking(et["id"], datetime.now(timezone.utc) + timedelta(hours=1), "Alice")
+        b = models.create_booking(et["id"], datetime.now(UTC) + timedelta(hours=1), "Alice")
         resp = client.get(f"/api/bookings/{b['id']}")
         assert resp.status_code == 200
         assert resp.get_json()["guestName"] == "Alice"
@@ -164,7 +164,7 @@ class TestAdminEventTypes:
 
     def test_delete_cascades_bookings(self, client):
         et = models.create_event_type("del", "desc", 30)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         models.create_booking(et["id"], now + timedelta(hours=1), "a")
         models.create_booking(et["id"], now + timedelta(hours=2), "b")
         resp = client.delete(f"/api/admin/event-types/{et['id']}")
@@ -184,7 +184,7 @@ class TestAdminUpcoming:
 
     def test_with_future_bookings(self, client):
         et = models.create_event_type("1on1", "Weekly sync", 30)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         b = models.create_booking(et["id"], now + timedelta(hours=1), "Alice")
         resp = client.get("/api/admin/bookings/upcoming")
         assert resp.status_code == 200

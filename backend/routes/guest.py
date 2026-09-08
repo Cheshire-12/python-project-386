@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from flask import Blueprint, jsonify, request
 
-from backend.errors import NotFoundError, ConflictError, ValidationError
+from backend.errors import ConflictError, NotFoundError, ValidationError
 from backend.models import (
     create_booking,
+    find_conflicting_booking,
     get_booking,
     get_event_type,
     list_event_types,
-    find_conflicting_booking,
 )
 from backend.services.slots import generate_slots
 from backend.services.validation import validate_booking_create
@@ -44,9 +44,9 @@ def list_slots(event_type_id: int):
     to_dt = None
 
     if from_param:
-        from_dt = datetime.fromisoformat(from_param.replace("Z", "+00:00"))
+        from_dt = datetime.fromisoformat(from_param)
     if to_param:
-        to_dt = datetime.fromisoformat(to_param.replace("Z", "+00:00"))
+        to_dt = datetime.fromisoformat(to_param)
 
     slots = generate_slots(et["durationMinutes"], from_dt, to_dt)
     return jsonify(slots)
@@ -60,8 +60,8 @@ def create():
 
     validate_booking_create(data)
 
-    starts_at = datetime.fromisoformat(data["startsAt"].replace("Z", "+00:00"))
-    starts_utc = starts_at.astimezone(timezone.utc)
+    starts_at = datetime.fromisoformat(data["startsAt"])
+    starts_utc = starts_at.astimezone(UTC)
 
     event_type = get_event_type(data["eventTypeId"])
     existing = find_conflicting_booking(starts_utc, event_type["durationMinutes"])

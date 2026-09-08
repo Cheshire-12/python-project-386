@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from backend.app import create_app
 from backend import models
+from backend.app import create_app
 from backend.errors import ValidationError
 from backend.services.validation import (
     validate_booking_create,
@@ -80,7 +80,7 @@ class TestValidateEventTypeUpdate:
 class TestValidateBookingCreate:
     def test_valid(self):
         et = models.create_event_type("1on1", "desc", 30)
-        future = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+        future = (datetime.now(UTC) + timedelta(hours=1)).isoformat()
         validate_booking_create({"eventTypeId": et["id"], "startsAt": future, "guestName": "Alice"})
 
     def test_missing_event_type_id(self):
@@ -109,38 +109,38 @@ class TestValidateBookingCreate:
 
     def test_missing_guest_name(self):
         et = models.create_event_type("1on1", "desc", 30)
-        future = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+        future = (datetime.now(UTC) + timedelta(hours=1)).isoformat()
         with pytest.raises(ValidationError):
             validate_booking_create({"eventTypeId": et["id"], "startsAt": future})
 
     def test_starts_at_in_past(self):
         et = models.create_event_type("1on1", "desc", 30)
-        past = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+        past = (datetime.now(UTC) - timedelta(hours=1)).isoformat()
         with pytest.raises(ValidationError) as exc_info:
             validate_booking_create({"eventTypeId": et["id"], "startsAt": past, "guestName": "Alice"})
         assert any("прошлом" in e for e in exc_info.value.details)
 
     def test_starts_at_beyond_14_days(self):
         et = models.create_event_type("1on1", "desc", 30)
-        too_later = (datetime.now(timezone.utc) + timedelta(days=15)).isoformat()
+        too_later = (datetime.now(UTC) + timedelta(days=15)).isoformat()
         with pytest.raises(ValidationError) as exc_info:
             validate_booking_create({"eventTypeId": et["id"], "startsAt": too_later, "guestName": "Alice"})
         assert any("14 дней" in e for e in exc_info.value.details)
 
     def test_starts_at_exactly_14_days_is_valid(self):
         et = models.create_event_type("1on1", "desc", 30)
-        exactly = (datetime.now(timezone.utc) + timedelta(days=13, hours=23, minutes=59)).isoformat()
+        exactly = (datetime.now(UTC) + timedelta(days=13, hours=23, minutes=59)).isoformat()
         validate_booking_create({"eventTypeId": et["id"], "startsAt": exactly, "guestName": "Alice"})
 
     def test_optional_phone_and_email(self):
         et = models.create_event_type("1on1", "desc", 30)
-        future = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+        future = (datetime.now(UTC) + timedelta(hours=1)).isoformat()
         validate_booking_create(
             {"eventTypeId": et["id"], "startsAt": future, "guestName": "Alice", "phone": None, "email": None}
         )
 
     def test_invalid_phone_type(self):
         et = models.create_event_type("1on1", "desc", 30)
-        future = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+        future = (datetime.now(UTC) + timedelta(hours=1)).isoformat()
         with pytest.raises(ValidationError):
             validate_booking_create({"eventTypeId": et["id"], "startsAt": future, "guestName": "Alice", "phone": 123})

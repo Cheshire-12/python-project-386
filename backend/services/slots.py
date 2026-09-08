@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 
 from backend.models import find_conflicting_booking
 
@@ -14,7 +14,7 @@ def generate_slots(
     from_dt: datetime | None = None,
     to_dt: datetime | None = None,
 ) -> list[dict]:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     if from_dt is None:
         from_dt = now
@@ -31,8 +31,8 @@ def generate_slots(
     current = start_of_day
 
     while current < end_limit:
-        slot_start_utc = current.astimezone(timezone.utc)
-        slot_end_utc = (current + timedelta(minutes=duration_minutes)).astimezone(timezone.utc)
+        slot_start_utc = current.astimezone(UTC)
+        slot_end_utc = (current + timedelta(minutes=duration_minutes)).astimezone(UTC)
 
         available = True
         if slot_start_utc < now:
