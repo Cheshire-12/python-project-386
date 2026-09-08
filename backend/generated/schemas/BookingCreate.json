@@ -1,0 +1,49 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "BookingCreate.json",
+    "type": "object",
+    "properties": {
+        "eventTypeId": {
+            "$ref": "EntityId.json",
+            "description": "Тип события, на который гость хочет записаться."
+        },
+        "startsAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Начало выбранного слота (ISO 8601)."
+        },
+        "guestName": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Имя гостя."
+        },
+        "phone": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "description": "Телефон гостя (опционально)"
+        },
+        "email": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "description": "Email гостя (опционально)"
+        }
+    },
+    "required": [
+        "eventTypeId",
+        "startsAt",
+        "guestName"
+    ],
+    "description": "Данные для создания бронирования гостем."
+}

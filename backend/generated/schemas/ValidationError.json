@@ -1,0 +1,30 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "ValidationError.json",
+    "type": "object",
+    "properties": {
+        "statusCode": {
+            "type": "number",
+            "const": 400
+        },
+        "code": {
+            "type": "string",
+            "const": "VALIDATION_ERROR"
+        },
+        "message": {
+            "type": "string"
+        },
+        "details": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    },
+    "required": [
+        "statusCode",
+        "code",
+        "message"
+    ],
+    "description": "Некорректные входные данные."
+}

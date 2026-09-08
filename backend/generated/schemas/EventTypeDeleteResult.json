@@ -1,0 +1,17 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "EventTypeDeleteResult.json",
+    "type": "object",
+    "properties": {
+        "deletedBookings": {
+            "type": "integer",
+            "minimum": -2147483648,
+            "maximum": 2147483647,
+            "description": "Количество удалённых связанных бронирований."
+        }
+    },
+    "required": [
+        "deletedBookings"
+    ],
+    "description": "Результат удаления типа события."
+}

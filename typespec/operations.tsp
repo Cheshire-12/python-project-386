@@ -70,7 +70,7 @@ namespace CallCalendar {
       @doc("Удаление типа события владельцем.")
       @route("/{eventTypeId}")
       @delete
-      op delete(@path eventTypeId: EntityId): void | NotFoundError;
+      op delete(@path eventTypeId: EntityId): EventTypeDeleteResult | NotFoundError;
     }
 
     @route("/bookings")

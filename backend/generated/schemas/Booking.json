@@ -1,0 +1,60 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "Booking.json",
+    "type": "object",
+    "properties": {
+        "id": {
+            "$ref": "EntityId.json",
+            "description": "Идентификатор бронирования."
+        },
+        "eventTypeId": {
+            "$ref": "EntityId.json",
+            "description": "Тип события, на который записан гость."
+        },
+        "guestName": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Имя гостя."
+        },
+        "phone": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "description": "Телефон гостя (опционально)"
+        },
+        "email": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "description": "Email гостя (опционально)"
+        },
+        "startsAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Начало бронирования (ISO 8601)."
+        },
+        "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Дата создания бронирования."
+        }
+    },
+    "required": [
+        "id",
+        "eventTypeId",
+        "guestName",
+        "startsAt",
+        "createdAt"
+    ],
+    "description": "Бронирование гостя на слот типа события."
+}

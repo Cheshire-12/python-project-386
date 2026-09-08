@@ -1,15 +1,51 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+import json
+from datetime import UTC, datetime, timedelta
+from functools import cache
+from pathlib import Path
+
+from jsonschema import Draft202012Validator
 
 from backend.errors import ValidationError
 from backend.models import get_event_type, list_event_types
 
 BOOKING_WINDOW_DAYS = 14
 
+SCHEMAS_DIR = Path(__file__).resolve().parents[1] / "generated" / "schemas"
+
+
+def _load_schema(name: str) -> dict:
+    file_path = SCHEMAS_DIR / f"{name}.json"
+    return json.loads(file_path.read_text(encoding="utf-8"))
+
+
+def _inline_refs(node):
+    """Резолв относительных $ref между файлами схем контракта (плоская структура)."""
+    if isinstance(node, dict):
+        ref = node.get("$ref")
+        if isinstance(ref, str) and ref.endswith(".json"):
+            return _inline_refs(_load_schema(ref.rsplit(".", 1)[0]))
+        return {key: _inline_refs(value) for key, value in node.items()}
+    if isinstance(node, list):
+        return [_inline_refs(item) for item in node]
+    return node
+
+
+@cache
+def _schema_validator(name: str) -> Draft202012Validator:
+    return Draft202012Validator(_inline_refs(_load_schema(name)))
+
+
+def validate_schema(schema_name: str, data: dict) -> list[str]:
+    return [
+        f"schema {schema_name}: {error.message}"
+        for error in _schema_validator(schema_name).iter_errors(data)
+    ]
+
 
 def validate_event_type_create(data: dict) -> None:
-    errors: list[str] = []
+    errors = validate_schema("EventTypeCreate", data)
 
     name = data.get("name")
     if not isinstance(name, str) or not (1 <= len(name) <= 100):
@@ -33,7 +69,7 @@ def validate_event_type_create(data: dict) -> None:
 
 
 def validate_event_type_update(data: dict, exclude_id: int) -> None:
-    errors: list[str] = []
+    errors = validate_schema("EventTypeCreate", data)
 
     name = data.get("name")
     if not isinstance(name, str) or not (1 <= len(name) <= 100):
@@ -57,7 +93,7 @@ def validate_event_type_update(data: dict, exclude_id: int) -> None:
 
 
 def validate_booking_create(data: dict) -> None:
-    errors: list[str] = []
+    errors = validate_schema("BookingCreate", data)
 
     event_type_id = data.get("eventTypeId")
     if not isinstance(event_type_id, int) or event_type_id < 1:
@@ -70,11 +106,11 @@ def validate_booking_create(data: dict) -> None:
         errors.append("startsAt: должно быть строкой ISO 8601")
     else:
         try:
-            parsed = datetime.fromisoformat(starts_at.replace("Z", "+00:00"))
+            parsed = datetime.fromisoformat(starts_at)
             if parsed.tzinfo is None:
                 errors.append("startsAt: время должно содержать информацию о часовой зоне")
             else:
-                now = datetime.now(timezone.utc)
+                now = datetime.now(UTC)
                 window_end = now + timedelta(days=BOOKING_WINDOW_DAYS)
                 if parsed < now:
                     errors.append("startsAt: время бронирования не может быть в прошлом")

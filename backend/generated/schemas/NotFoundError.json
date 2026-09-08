@@ -1,0 +1,24 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "NotFoundError.json",
+    "type": "object",
+    "properties": {
+        "statusCode": {
+            "type": "number",
+            "const": 404
+        },
+        "code": {
+            "type": "string",
+            "const": "NOT_FOUND"
+        },
+        "message": {
+            "type": "string"
+        }
+    },
+    "required": [
+        "statusCode",
+        "code",
+        "message"
+    ],
+    "description": "Ресурс не найден."
+}

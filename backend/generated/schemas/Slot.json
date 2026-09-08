@@ -1,0 +1,27 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "Slot.json",
+    "type": "object",
+    "properties": {
+        "start": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Начало слота (ISO 8601)."
+        },
+        "end": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Конец слота: start + durationMinutes типа события."
+        },
+        "available": {
+            "type": "boolean",
+            "description": "Свободен ли слот для бронирования."
+        }
+    },
+    "required": [
+        "start",
+        "end",
+        "available"
+    ],
+    "description": "Свободный слот бронирования в окне 14 дней.\nСлот вычисляется сервисом доступности и не хранится в БД."
+}

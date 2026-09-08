@@ -28,8 +28,7 @@
   - `src/pages/` — Страницы (Landing, GuestEventTypes, GuestBooking, BookingConfirmation, AdminEventTypes, AdminUpcoming)
   - `src/components/` — Переиспользуемые компоненты (Header, Layout, SlotPicker, BookingForm, CreateEventTypeModal, AdminSidebar)
   - `tests/` — E2E тесты (Playwright)
-- `Makefile` — автоматизация: `make dev`, `make spec`, `make prism-mock`
-- `prism.yaml` — конфигурация Prism HTTP mock/proxy (порт 4010)
+- `Makefile` — автоматизация: `make dev`, `make spec`, `make prism-mock` (конфиг Prism задаётся флагами CLI в Makefile)
 
 ## Ключевые команды
 ```bash
@@ -38,8 +37,9 @@ make backend-install     # Python зависимости (uv sync)
 make frontend-install    # cd frontend && npm install
 
 # Спецификация
-make spec              # компиляция TypeSpec → dist/openapi.yaml
+make spec              # TypeSpec → dist/openapi.yaml + backend/generated/schemas/ (JSON Schema)
 make spec-watch        # режим слежения
+make client            # фронтийн SDL: openapi-typescript → frontend/src/types/generated/schema.ts
 
 # Разработка (Flask backend + Vite dev server)
 make dev               # make backend-run + make frontend-dev
@@ -48,6 +48,9 @@ make frontend-dev      # cd frontend && npm run dev (порт 3000)
 
 # Сборка
 make frontend-build    # production сборка
+
+# Линтер
+make lint              # ruff (backend) + oxlint (frontend)
 
 # E2E тесты
 make test-install       # установить Chromium для Playwright
@@ -257,6 +260,10 @@ Default canonical labels. See `docs/agents/triage-labels.md`.
 ### Domain docs
 
 Single-context layout. See `docs/agents/domain.md`.
+
+### MCP servers
+
+Конфигурация MCP-серверов лежит в репозитории — `.mcp.json` (GitHub MCP server для работы с Issue-трекером).
 
 ## Важные замечания
 - .github/workflows/hexlet-check.yml и .github/workflows/README.md — служебные файлы Hexlet: их **нельзя редактировать, удалять или переименовывать.**

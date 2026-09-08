@@ -71,10 +71,12 @@ model Booking {
   guestName: string;
 
   /** Телефон гостя (опционально). */
-  phone?: string;
+  @doc("Телефон гостя (опционально)")
+  phone?: string | null;
 
   /** Email гостя (опционально). */
-  email?: string;
+  @doc("Email гостя (опционально)")
+  email?: string | null;
 
   /** Начало бронирования (ISO 8601). */
   startsAt: utcDateTime;
@@ -96,10 +98,18 @@ model BookingCreate {
   guestName: string;
 
   /** Телефон гостя (опционально). */
-  phone?: string;
+  @doc("Телефон гостя (опционально)")
+  phone?: string | null;
 
   /** Email гостя (опционально). */
-  email?: string;
+  @doc("Email гостя (опционально)")
+  email?: string | null;
+}
+
+/** Результат удаления типа события. */
+model EventTypeDeleteResult {
+  /** Количество удалённых связанных бронирований. */
+  deletedBookings: int32;
 }
 
 /**

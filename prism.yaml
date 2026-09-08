@@ -1,4 +1,0 @@
-openapi: 3.0.0
-path: dist/openapi.yaml
-port: 4010
-mock: true

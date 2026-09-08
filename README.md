@@ -23,7 +23,7 @@
 
 - **Бэкенд:** Flask (Python ≥ 3.12), SQLite (данные в `data/calendar.db`)
 - **Управление зависимостями:** uv + pyproject.toml (hatchling)
-- **API-контракт:** TypeSpec → OpenAPI 3.0
+- **API-контракт:** TypeSpec → OpenAPI 3.0 (`dist/openapi.yaml`) + JSON Schema (`backend/generated/schemas/` для серверной валидации) + TS-типы клиента (`frontend/src/types/generated/schema.ts`)
 - **Фронтенд:** React 19 + TypeScript + Vite + Mantine 9 (тёмная тема Cal.com-стиль)
 - **E2E тесты:** Playwright (Chromium)
 - **Мокинг:** Prism (опционально, mock/proxy по OpenAPI)
@@ -34,11 +34,13 @@
 ```
 pyproject.toml           # зависимости проекта (uv, hatchling)
 Makefile                 # автоматизация сборки
-typespec/                # спецификация TypeSpec (3 файла)
+typespec/                # спецификация TypeSpec (3 файла + tspconfig.yaml)
   main.tsp               # определение сервиса
   models.tsp             # модели данных
   operations.tsp         # операции API
 dist/                    # генерируемый OpenAPI 3.0 (make spec)
+backend/
+  generated/schemas/     # генерируемые JSON Schema контракта (для серверной валидации)
 backend/                 # Flask бэкенд (Python ≥ 3.12)
   app.py                 # create_app, CORS, blueprints, catch-all маршрут
   errors.py              # обработка ошибок (ApiError, NotFound, Conflict, Validation)

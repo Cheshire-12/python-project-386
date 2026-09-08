@@ -1,12 +1,17 @@
-.PHONY: spec spec-watch dev backend-run backend-install frontend-dev preview openapi help prism-mock prism-proxy prism-stop frontend-install frontend-build test test-install test-e2e test-e2e-ui test-e2e-report docker-build docker-run docker-up docker-down
+.PHONY: spec spec-watch client dev backend-run backend-install frontend-dev preview openapi help prism-mock prism-proxy prism-stop frontend-install frontend-build test test-install test-e2e test-e2e-ui test-e2e-report docker-build docker-run docker-up docker-down lint
 
 spec:
-	npx tsp compile typespec --emit @typespec/openapi3 --output-dir dist
-	cp dist/@typespec/openapi3/openapi.yaml dist/openapi.yaml
-	rm -rf dist/@typespec
+	npx tsp compile typespec
+	cp dist/openapi3/openapi.yaml dist/openapi.yaml
+	mkdir -p backend/generated/schemas
+	cp dist/json-schema/*.json backend/generated/schemas/
+	rm -rf dist/openapi3 dist/json-schema
 
 spec-watch:
 	cd frontend && npm run spec:watch
+
+client:
+	cd frontend && npm run generate:client
 
 dev: backend-run frontend-dev
 
@@ -42,6 +47,10 @@ prism-stop:
 
 test:
 	uv run pytest tests/ -v
+
+lint:
+	uv run ruff check backend tests
+	cd frontend && npm run lint
 
 test-install:
 	cd frontend && npx playwright install chromium
@@ -87,6 +96,7 @@ help:
 	@echo "  make prism-proxy     - Start Prism proxy to backend"
 	@echo "  make prism-stop      - Stop Prism server"
 	@echo "  make test            - Run unit tests (pytest)"
+	@echo "  make lint            - Run linters (ruff + oxlint)"
 	@echo "  make docker-build    - Build Docker image"
 	@echo "  make docker-run      - Run Docker container"
 	@echo "  make docker-up       - Start docker-compose (dev)"

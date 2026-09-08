@@ -1,0 +1,24 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "ConflictError.json",
+    "type": "object",
+    "properties": {
+        "statusCode": {
+            "type": "number",
+            "const": 409
+        },
+        "code": {
+            "type": "string",
+            "const": "SLOT_BUSY"
+        },
+        "message": {
+            "type": "string"
+        }
+    },
+    "required": [
+        "statusCode",
+        "code",
+        "message"
+    ],
+    "description": "Слот занят: на это время уже есть бронирование (любого типа события)."
+}

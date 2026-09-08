@@ -8,8 +8,14 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "generate:client": "openapi-typescript ../dist/openapi.yaml -o ./src/types/generated/schema.ts",
     "spec:compile": "tsp compile ../typespec --output-dir ./src/types/generated",
     "spec:watch": "tsp compile ../typespec --output-dir ./src/types/generated --watch"
+  },
+  "overrides": {
+    "openapi-typescript": {
+      "typescript": "$typescript"
+    }
   },
   "dependencies": {
     "@mantine/core": "^9.5.2",
@@ -31,6 +37,7 @@
     "@typespec/openapi": "^1.15.0",
     "@typespec/openapi3": "^1.15.0",
     "@vitejs/plugin-react": "^6.1.0",
+    "openapi-typescript": "^7.13.0",
     "oxlint": "^1.79.0",
     "typescript": "~6.0.2",
     "vite": "^8.2.2"
