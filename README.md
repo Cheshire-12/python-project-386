@@ -2,6 +2,16 @@
 
 Веб-приложение для записи на звонки по аналогии с Cal.com. Гость выбирает тип события, свободный слот и бронирует. Админ управляет типами событий и видит предстоящие встречи.
 
+## GitHub Actions
+
+| Tool | Status |
+| :--- | :--- |
+| **Hexlet tests** | [![hexlet-check](https://github.com/Cheshire-12/python-project-386/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/Cheshire-12/python-project-386/actions/workflows/hexlet-check.yml) |
+| **E2E Tests** | [![E2E Tests](https://github.com/Cheshire-12/python-project-386/actions/workflows/e2e.yml/badge.svg)](https://github.com/Cheshire-12/python-project-386/actions/workflows/e2e.yml) |
+| **Lint** | [![Lint](https://github.com/Cheshire-12/python-project-386/actions/workflows/lint.yml/badge.svg)](https://github.com/Cheshire-12/python-project-386/actions/workflows/lint.yml) |
+| **Unit Tests** | [![Unit Tests](https://github.com/Cheshire-12/python-project-386/actions/workflows/tests.yml/badge.svg)](https://github.com/Cheshire-12/python-project-386/actions/workflows/tests.yml) |
+| **Release Please** | [![Release Please](https://github.com/Cheshire-12/python-project-386/actions/workflows/release-please.yml/badge.svg)](https://github.com/Cheshire-12/python-project-386/actions/workflows/release-please.yml) |
+
 ## Роли
 
 - **Владелец календаря (админ)** — один заранее заданный профиль, используется в админской части. Регистрация и авторизация отсутствуют.
