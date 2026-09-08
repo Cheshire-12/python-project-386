@@ -22,7 +22,7 @@ type TestFixtures = {
 };
 
 export const test = base.extend<TestFixtures>({
-  createTestEvent: async ({}, use) => {
+  createTestEvent: async ({}, done) => {
     const fn = async (overrides?: Partial<EventTypeData>) => {
       const id = uid();
       return createEventType({
@@ -32,11 +32,11 @@ export const test = base.extend<TestFixtures>({
         ...overrides,
       });
     };
-    await use(fn);
+    await done(fn);
   },
 
-  createTestBooking: async ({}, use) => {
-    await use(async (eventTypeId, startsAt) => {
+  createTestBooking: async ({}, done) => {
+    await done(async (eventTypeId, startsAt) => {
       return createBooking({
         eventTypeId,
         startsAt,
@@ -46,8 +46,8 @@ export const test = base.extend<TestFixtures>({
     });
   },
 
-  getAvailableSlot: async ({}, use) => {
-    await use(async (eventTypeId) => {
+  getAvailableSlot: async ({}, done) => {
+    await done(async (eventTypeId) => {
       const from = new Date().toISOString();
       const to = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
       const slots = await getSlots(eventTypeId, from, to);

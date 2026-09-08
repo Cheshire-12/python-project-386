@@ -2,7 +2,7 @@ import { test, expect } from './fixtures/test';
 
 test.describe('Guest event types', () => {
   test('creates an event type and sees it in the list', async ({ page, createTestEvent }) => {
-    const et = await createTestEvent({
+    await createTestEvent({
       name: 'My Meeting',
       description: 'A short meeting',
       durationMinutes: 30,

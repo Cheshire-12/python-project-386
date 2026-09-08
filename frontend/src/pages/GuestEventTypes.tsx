@@ -25,6 +25,7 @@ import {
 import { notifications } from '@mantine/notifications';
 import { eventTypesApi } from '@/api/eventTypes';
 import { CreateEventTypeModal } from '@/components/CreateEventTypeModal';
+import { formatDuration } from '@/lib/format';
 import type { EventType } from '@/types';
 
 export function GuestEventTypes() {
@@ -140,7 +141,7 @@ export function GuestEventTypes() {
                       mt={4}
                       w="fit-content"
                     >
-                      {et.durationMinutes}m
+                      {formatDuration(et.durationMinutes)}
                     </Badge>
                   </Stack>
 

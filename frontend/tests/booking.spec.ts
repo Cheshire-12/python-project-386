@@ -11,7 +11,7 @@ test.describe('Booking flow', () => {
 
     await expect(page.getByText(eventType.name, { exact: true })).toBeVisible();
     await expect(page.getByText('Короткий звонок')).toBeVisible();
-    await expect(page.getByText('30m', { exact: true })).toBeVisible();
+    await expect(page.getByText('30 мин')).toBeVisible();
 
     const availableSlot = page.getByRole('button', { name: /^\d{2}:\d{2}$/ }).first();
     await expect(availableSlot).toBeVisible({ timeout: 10_000 });

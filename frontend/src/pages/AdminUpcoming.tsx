@@ -11,7 +11,8 @@ import {
   SimpleGrid,
 } from '@mantine/core';
 import { IconClock, IconUser } from '@tabler/icons-react';
-import dayjs from 'dayjs';
+import { formatDateShort } from '@/lib/datetime';
+import { formatDuration } from '@/lib/format';
 import { adminApi } from '@/api/admin';
 import { eventTypesApi } from '@/api/eventTypes';
 import { AdminSidebar } from '@/components/AdminSidebar';
@@ -92,7 +93,7 @@ export function AdminUpcoming() {
                     <Table.Td>
                       <Group gap="xs">
                         <IconClock size={14} color="#909296" />
-                        {dayjs(b.startsAt).format('D MMM, HH:mm')}
+                        {formatDateShort(b.startsAt)}
                       </Group>
                     </Table.Td>
                     <Table.Td>
@@ -102,7 +103,7 @@ export function AdminUpcoming() {
                     </Table.Td>
                     <Table.Td>
                       <Text size="sm" c="dimmed">
-                        {eventTypeDurationMap.get(b.eventTypeId)} минут
+                        {formatDuration(eventTypeDurationMap.get(b.eventTypeId))}
                       </Text>
                     </Table.Td>
                     <Table.Td>

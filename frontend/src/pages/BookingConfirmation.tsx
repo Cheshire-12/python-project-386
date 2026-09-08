@@ -14,7 +14,7 @@ import {
   Button,
 } from '@mantine/core';
 import { IconCheck, IconArrowLeft } from '@tabler/icons-react';
-import dayjs from 'dayjs';
+import { formatDateTime } from '@/lib/datetime';
 import { bookingsApi } from '@/api/bookings';
 import type { Booking } from '@/types';
 
@@ -94,7 +94,7 @@ export function BookingConfirmation() {
               <Group justify="space-between">
                 <Text c="dimmed">Время:</Text>
                 <Text fw={500}>
-                  {dayjs(booking.startsAt).format('D MMMM YYYY, HH:mm')}
+                  {formatDateTime(booking.startsAt)}
                 </Text>
               </Group>
               <Group justify="space-between">

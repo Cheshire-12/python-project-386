@@ -22,6 +22,8 @@ import { notifications } from '@mantine/notifications';
 import { IconPlus, IconClock, IconPencil, IconTrash } from '@tabler/icons-react';
 import { adminApi } from '@/api/admin';
 import { AdminSidebar } from '@/components/AdminSidebar';
+import { CreateEventTypeModal } from '@/components/CreateEventTypeModal';
+import { formatDuration } from '@/lib/format';
 import type { EventType, EventTypeCreate } from '@/types';
 
 export function AdminEventTypes() {
@@ -29,12 +31,6 @@ export function AdminEventTypes() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [form, setForm] = useState<EventTypeCreate>({
-    name: '',
-    description: '',
-    durationMinutes: 30,
-  });
 
   const [editingType, setEditingType] = useState<EventType | null>(null);
   const [editForm, setEditForm] = useState<EventTypeCreate>({
@@ -59,20 +55,6 @@ export function AdminEventTypes() {
   useEffect(() => {
     load();
   }, []);
-
-  const handleCreate = async () => {
-    setCreating(true);
-    try {
-      await adminApi.eventTypes.create(form);
-      setCreateModalOpen(false);
-      setForm({ name: '', description: '', durationMinutes: 30 });
-      load();
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setCreating(false);
-    }
-  };
 
   const openEdit = (et: EventType) => {
     setEditingType(et);
@@ -185,7 +167,7 @@ export function AdminEventTypes() {
                         color="blue"
                         leftSection={<IconClock size={14} />}
                       >
-                        {et.durationMinutes} мин
+                        {formatDuration(et.durationMinutes)}
                       </Badge>
                     </Table.Td>
                     <Table.Td>
@@ -216,66 +198,6 @@ export function AdminEventTypes() {
             </Table>
           )}
         </Stack>
-
-        {/* Create modal */}
-        <Modal
-          opened={createModalOpen}
-          onClose={() => setCreateModalOpen(false)}
-          title="Новый тип события"
-          centered
-          styles={{
-            content: { backgroundColor: '#1a1b1e' },
-            header: { backgroundColor: '#1a1b1e' },
-            title: { fontWeight: 700, fontSize: '1.25rem', color: '#fafafa' },
-          }}
-        >
-          <Stack gap="md">
-            <TextInput
-              label="Название"
-              placeholder="Консультация"
-              value={form.name}
-              onChange={(e) =>
-                setForm({ ...form, name: e.currentTarget.value })
-              }
-              required
-            />
-            <Textarea
-              label="Описание"
-              placeholder="Краткое описание события"
-              value={form.description}
-              onChange={(e) =>
-                setForm({ ...form, description: e.currentTarget.value })
-              }
-              required
-            />
-            <NumberInput
-              label="Длительность (мин)"
-              value={form.durationMinutes}
-              onChange={(val) =>
-                setForm({
-                  ...form,
-                  durationMinutes:
-                    typeof val === 'number' ? val : parseInt(String(val)) || 30,
-                })
-              }
-              min={1}
-              step={5}
-              required
-            />
-            <Group justify="flex-end">
-              <Button
-                variant="subtle"
-                color="gray"
-                onClick={() => setCreateModalOpen(false)}
-              >
-                Отмена
-              </Button>
-              <Button onClick={handleCreate} loading={creating}>
-                Создать
-              </Button>
-            </Group>
-          </Stack>
-        </Modal>
 
         {/* Edit modal */}
         <Modal
@@ -374,6 +296,12 @@ export function AdminEventTypes() {
             </Group>
           </Stack>
         </Modal>
+
+        <CreateEventTypeModal
+          opened={createModalOpen}
+          onClose={() => setCreateModalOpen(false)}
+          onCreated={load}
+        />
       </Paper>
     </SimpleGrid>
   );

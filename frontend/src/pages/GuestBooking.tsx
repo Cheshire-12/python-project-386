@@ -7,7 +7,6 @@ import {
   Center,
   Loader,
   Paper,
-  Select,
   Divider,
 } from '@mantine/core';
 import { IconClock, IconGlobe } from '@tabler/icons-react';
@@ -16,16 +15,9 @@ import { eventTypesApi } from '@/api/eventTypes';
 import { bookingsApi } from '@/api/bookings';
 import { SlotPicker } from '@/components/SlotPicker';
 import { BookingForm } from '@/components/BookingForm';
+import { nowMsk } from '@/lib/datetime';
+import { formatDuration } from '@/lib/format';
 import type { EventType, Slot } from '@/types';
-
-const timezones = [
-  { value: 'Europe/Moscow', label: 'Europe/Moscow' },
-  { value: 'Europe/London', label: 'Europe/London' },
-  { value: 'America/New_York', label: 'America/New_York' },
-  { value: 'Asia/Tokyo', label: 'Asia/Tokyo' },
-  { value: 'Asia/Shanghai', label: 'Asia/Shanghai' },
-  { value: 'UTC', label: 'UTC' },
-];
 
 export function GuestBooking() {
   const { id } = useParams<{ id: string }>();
@@ -33,12 +25,12 @@ export function GuestBooking() {
 
   const [eventType, setEventType] = useState<EventType | null>(null);
   const [slots, setSlots] = useState<Slot[]>([]);
-  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [selectedDate, setSelectedDate] = useState(() => nowMsk());
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
-  const [timezone, setTimezone] = useState('Europe/Moscow');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [slotsError, setSlotsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -55,8 +47,11 @@ export function GuestBooking() {
     const to = dayjs().add(14, 'day').toISOString();
     eventTypesApi
       .listSlots(Number(id), from, to)
-      .then(setSlots)
-      .catch(() => {});
+      .then((data) => {
+        setSlots(data);
+        setSlotsError(null);
+      })
+      .catch((err) => setSlotsError(err.message));
   }, [id]);
 
   const handleSubmit = async (data: {
@@ -133,30 +128,15 @@ export function GuestBooking() {
           <Group gap="xs">
             <IconClock size={16} color="#909296" />
             <Text size="sm" c="dimmed">
-              {eventType.durationMinutes}m
+              {formatDuration(eventType.durationMinutes)}
             </Text>
           </Group>
 
           <Group gap="xs">
             <IconGlobe size={16} color="#909296" />
-            <Select
-              data={timezones}
-              value={timezone}
-              onChange={(v) => v && setTimezone(v)}
-              size="xs"
-              variant="unstyled"
-              style={{ flex: 1 }}
-              styles={{
-                input: {
-                  color: '#fafafa',
-                  padding: 0,
-                  height: 'auto',
-                  minHeight: 'auto',
-                  border: 'none',
-                  backgroundColor: 'transparent',
-                },
-              }}
-            />
+            <Text size="sm" c="dimmed">
+              Europe/Moscow
+            </Text>
           </Group>
         </Stack>
       </Paper>
@@ -164,6 +144,8 @@ export function GuestBooking() {
       {/* Center + Right panels — Calendar + Slots */}
       <div style={{ flex: 1, padding: 16, backgroundColor: '#18181b' }}>
         <Stack gap="md">
+          {slotsError && <Text c="red">{slotsError}</Text>}
+
           <SlotPicker
             slots={slots}
             selectedDate={selectedDate}

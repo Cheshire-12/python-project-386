@@ -13,14 +13,15 @@ import {
   IconChevronLeft,
   IconChevronRight,
 } from '@tabler/icons-react';
-import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
+import { nowMsk, toMsk } from '@/lib/datetime';
 import type { Slot } from '@/types';
 
 interface SlotPickerProps {
   slots: Slot[];
-  selectedDate: dayjs.Dayjs;
+  selectedDate: Dayjs;
   selectedSlot: Slot | null;
-  onDateSelect: (date: dayjs.Dayjs) => void;
+  onDateSelect: (date: Dayjs) => void;
   onSlotSelect: (slot: Slot) => void;
 }
 
@@ -31,7 +32,7 @@ export function SlotPicker({
   onDateSelect,
   onSlotSelect,
 }: SlotPickerProps) {
-  const [currentMonth, setCurrentMonth] = useState(dayjs());
+  const [currentMonth, setCurrentMonth] = useState(() => nowMsk());
   const [timeFormat, setTimeFormat] = useState<string>('24');
 
   const days = useMemo(() => {
@@ -40,7 +41,7 @@ export function SlotPicker({
     const daysInMonth = end.date();
     const startDay = start.day();
 
-    const result: (dayjs.Dayjs | null)[] = [];
+    const result: (Dayjs | null)[] = [];
     for (let i = 0; i < startDay; i++) {
       result.push(null);
     }
@@ -50,21 +51,43 @@ export function SlotPicker({
     return result;
   }, [currentMonth]);
 
-  const slotsForDate = useMemo(() => {
-    return slots.filter((slot) =>
-      dayjs(slot.start).isSame(selectedDate, 'day'),
-    );
-  }, [slots, selectedDate]);
+  const dayKey = (date: Dayjs) => date.format('YYYY-MM-DD');
 
-  const availableSlotsForDate = slotsForDate.filter((s) => s.available);
+  const slotsByDay = useMemo(() => {
+    const map = new Map<string, Slot[]>();
+    for (const slot of slots) {
+      const key = dayKey(toMsk(slot.start));
+      const arr = map.get(key);
+      if (arr) {
+        arr.push(slot);
+      } else {
+        map.set(key, [slot]);
+      }
+    }
+    return map;
+  }, [slots]);
+
+  const availableDates = useMemo(() => {
+    const set = new Set<string>();
+    for (const slot of slots) {
+      if (slot.available) {
+        set.add(dayKey(toMsk(slot.start)));
+      }
+    }
+    return set;
+  }, [slots]);
+
+  const availableSlotsForDate = (slotsByDay.get(dayKey(selectedDate)) ?? []).filter(
+    (s) => s.available,
+  );
 
   const weekDays = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
 
   const formatTime = (time: string) => {
     if (timeFormat === '12') {
-      return dayjs(time).format('hh:mm A');
+      return toMsk(time).format('hh:mm A');
     }
-    return dayjs(time).format('HH:mm');
+    return toMsk(time).format('HH:mm');
   };
 
   return (
@@ -96,8 +119,8 @@ export function SlotPicker({
             ))}
             {days.map((day, i) => {
               const isSelected = day && day.isSame(selectedDate, 'day');
-              const isToday = day && day.isSame(dayjs(), 'day');
-              const hasSlots = day && slots.some((s) => dayjs(s.start).isSame(day, 'day') && s.available);
+              const isToday = day && day.isSame(nowMsk(), 'day');
+              const hasSlots = day && availableDates.has(dayKey(day));
 
               return (
                 <UnstyledButton

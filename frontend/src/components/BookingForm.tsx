@@ -11,7 +11,7 @@ import {
   LoadingOverlay,
 } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
-import dayjs from 'dayjs';
+import { formatDateTime, formatTime } from '@/lib/datetime';
 import type { Slot, EventType } from '@/types';
 
 interface BookingFormProps {
@@ -58,8 +58,7 @@ export function BookingForm({
             Свободно
           </Badge>
           <Text size="sm" c="dimmed">
-            {dayjs(selectedSlot.start).format('D MMMM YYYY, HH:mm')} –{' '}
-            {dayjs(selectedSlot.end).format('HH:mm')}
+            {formatDateTime(selectedSlot.start)} – {formatTime(selectedSlot.end)}
           </Text>
         </Group>
 
@@ -80,7 +79,6 @@ export function BookingForm({
               type="email"
               value={email}
               onChange={(e) => setEmail(e.currentTarget.value)}
-              required
             />
             <TextInput
               label="Телефон"

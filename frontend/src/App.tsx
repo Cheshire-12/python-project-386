@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MantineProvider, createTheme } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { Layout } from './components/Layout';
@@ -41,6 +41,7 @@ function App() {
             <Route path="/bookings/:id" element={<BookingConfirmation />} />
             <Route path="/admin/event-types" element={<AdminEventTypes />} />
             <Route path="/admin/upcoming" element={<AdminUpcoming />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>
