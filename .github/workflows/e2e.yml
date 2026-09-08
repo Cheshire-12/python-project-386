@@ -35,11 +35,6 @@ jobs:
         run: npx playwright install --with-deps chromium
         working-directory: frontend
 
-      - name: Start Flask backend
-        run: uv run flask run --port 8000 &
-        env:
-          FLASK_APP: "backend.app:create_app"
-
       - name: Run E2E tests
         run: npx playwright test
         working-directory: frontend
