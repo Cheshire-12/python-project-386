@@ -98,7 +98,7 @@ make openapi           # cat dist/openapi.yaml
 - `/admin/upcoming` — Предстоящие встречи
 
 ## Требования к окружению
-- Node.js 20+ для фронтенда, Prism и Playwright
+- Node.js 20+ для фронтенда, Prism и Playwright; **Node 22+** для TypeSpec-тулинга (`make spec` / contract-sync в CI)
 - Python 3.12+ для бэкенда
 - uv — управление зависимостями Python
 - `uv sync` — установить Python зависимости
